@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cyber Noir -->
+    <!-- Application Structure Plan: A single-page, top-down narrative structure for the homepage. It starts with a broad introduction (Hero), guides users to the three main content pillars of the site (What I Do cards), and ends with a call to action/contact point (Footer). This is the most intuitive flow for a new visitor, clearly signposting the key areas of the website without overwhelming them. Each card acts as a direct portal to the respective detailed pages. -->
+    <!-- Visualization & Content Choices: Content: Hero Section -> Goal: Immediate Introduction -> Presentation: Large, clean typography -> Interaction: CTA buttons to primary pages -> Justification: Grabs attention and provides immediate, clear navigation paths. Content: "What I Do" Cards -> Goal: Segment skills -> Presentation: 3-column grid with icons and brief text -> Interaction: Clickable cards linking to sub-pages -> Justification: Allows users to quickly self-identify their area of interest (coding, music, or services) and navigate efficiently. Unicode characters are used for simple, clean iconography. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .hero-bg {
+            background-color: #1F2937; 
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-bg {
+            background-color: #374151; /* Medium-Dark Gray / Gray-700 */
+        }
+        .section-bg {
+            background-color: #111827;
+        }
+        .btn-primary {
+            background-color: #4A5C50; /* Murky Green */
+            color: #F9FAFB; /* Off-white / Gray-50 */
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .btn-secondary {
+            background-color: #4B5563; /* Dark Gray / Gray-600 */
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+
+        /* Styles for the background collage */
+        .scroller {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; 
+        }
+        
+        .scroller::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        .scroller__inner {
+            display: flex;
+            gap: 1rem;
+            width: max-content;
+            height: 100%;
+            animation: scroll 60s linear infinite;
+        }
+
+        @keyframes scroll {
+            to {
+                transform: translate(calc(-50% - 0.5rem));
+            }
+        }
+
+        .scroller__inner img {
+            height: 100%; 
+            width: auto;
+            max-width: none;
+            object-fit: cover;
+            opacity: 0.5;
+        }
+        
+        .hero-content-container {
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+        }
+
+        /* Merged Styles for Waveform Generator */
+        .bg-control-panel { background-color: #1F2937; }
+        .bg-oscillator { background-color: #374151; position: relative; }
+        .btn-action {
+            background-color: #4A5C50;
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover { background-color: #DC143C; }
+        .btn-multiplier {
+            background-color: #4B5563;
+            color: #E5E7EB;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .btn-multiplier:hover {
+            background-color: #DC143C;
+        }
+        .btn-utility {
+            background-color: #4B5563;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+        }
+        .btn-utility:hover {
+            background-color: #22D3EE;
+            color: #111827;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #4B5563;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            border-radius: 2px;
+        }
+        input[type="range"]:hover { opacity: 1; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #22D3EE;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #22D3EE;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        /* Added for new letter color animation */
+        @keyframes letter-color-shift {
+            0% { color: #22D3EE; } /* Bright Cyan */
+            50% { color: #4A5C50; } /* Murky Green */
+            100% { color: #DC143C; } /* Crimson */
+        }
+
+        .letter-animate {
+            animation: letter-color-shift 1s forwards;
+            display: inline-block; /* Needed for the animation to apply properly */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation (Placeholder for Google Sites) -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                <a href="#" class="text-accent mx-3 font-bold">Home</a>
+                <a href="resume.html" class="text-gray-300 hover:text-accent mx-3">R&eacute;sum&eacute;</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <main>
+        <section class="hero-bg text-center min-h-[70vh] md:min-h-[80vh]">
+            <div class="scroller">
+                <div class="scroller__inner">
+                    <img src="pictures/title/acoustic_looper.png" alt="">
+                    <img src="pictures/title/tommy_electric_gig051825.jpg" alt="">
+                    <img src="pictures/title/bcdl_fisheye.jpg" alt="">
+                    <img src="pictures/title/bcdl_tommy_drums_jack.jpg" alt="">
+                    <img src="pictures/title/caramel_pedal_inside021022.jpg" alt="">
+                    <img src="pictures/title/dac_adc_circuit120122.jpg" alt="">
+                    <img src="pictures/title/imu_press_assembly042325.jpg" alt="">
+                    <img src="pictures/title/lcd_hello_world.jpg" alt="">
+                    <img src="pictures/title/pressure_display031725.jpg" alt="">
+                    <img src="pictures/title/velvet_elvis_drummer052122.jpg" alt="">
+                    <img src="pictures/title/pypevypers_assembly.jpg" alt="">
+                    <img src="pictures/title/tommy_guitar_colors2_2022.jpg" alt="">
+                    <img src="pictures/title/solenoid_assembly050225.jpg" alt="">
+                    <img src="pictures/title/tommy_focus_guitar_red.jpg" alt="">
+                    <img src="pictures/title/tommy_chobo_menacing.jpg" alt="">
+                    <img src="pictures/title/tommy_drums_green.jpg" alt="">
+                    <img src="pictures/title/tommy_focus_drums_green.jpg" alt="">
+                    <img src="pictures/title/lidar_robot.jpg" alt="">
+                    <img src="pictures/title/tommy_professor_glasses.jpg" alt="">
+                    <img src="pictures/title/addie_ai_dance.png" alt="">
+                    <img src="pictures/title/tommy_fab_lab120122.jpg" alt="">
+                    <img src="pictures/title/silicon_wafer120122.jpg" alt="">
+                    <img src="pictures/title/tommy_code_startled031924.jpg" alt="">
+                </div>
+            </div>
+            <div class="container mx-auto px-6 hero-content-container">
+                <h1 id="animated-title" class="text-4xl md:text-6xl font-bold text-header leading-tight min-h-[80px] md:min-h-[100px]"></h1>
+                <p class="mt-4 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">Let's build the thing you're imagining.</p>
+                <div class="mt-8 flex justify-center gap-4">
+                    <a href="projects.html" class="btn-primary font-semibold py-3 px-6 rounded-lg shadow-md">View My Work</a>
+                    <a href="services.html" class="btn-secondary font-semibold py-3 px-6 rounded-lg">Hire My Skills</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- "What I Do" Section -->
+        <section id="services" class="py-20 section-bg">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-header">What I Do</h2>
+                    <p class="text-gray-400 mt-2">I offer a unique blend of creative and technical skills.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <a href="projects.html" class="block p-8 card-bg rounded-xl shadow-lg hover:shadow-cyan-500/20 hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-5xl mb-4">💻</div>
+                        <h3 class="text-2xl font-bold mb-2 text-header">Coding & Development</h3>
+                        <p class="text-gray-300">From dynamic websites to custom software solutions, I write clean, efficient, and scalable code to bring ideas to life.</p>
+                        <span class="mt-4 inline-block font-semibold text-accent">Explore Projects &rarr;</span>
+                    </a>
+                    <a href="music.html" class="block p-8 card-bg rounded-xl shadow-lg hover:shadow-cyan-500/20 hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-5xl mb-4">🎵</div>
+                        <h3 class="text-2xl font-bold mb-2 text-header">Music & Sound Engineering</h3>
+                        <p class="text-gray-300">As a sound engineer and musician, I compose original music, record, mix, and master audio to professional standards.</p>
+                         <span class="mt-4 inline-block font-semibold text-accent">Listen to Music &rarr;</span>
+                    </a>
+                    <a href="services.html" class="block p-8 card-bg rounded-xl shadow-lg hover:shadow-cyan-500/20 hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-5xl mb-4">🛠️</div>
+                        <h3 class="text-2xl font-bold mb-2 text-header">Tech Support & Tutoring</h3>
+                        <p class="text-gray-300">I provide expert computer repair services and personalized tutoring sessions to help you master new technologies.</p>
+                         <span class="mt-4 inline-block font-semibold text-accent">View Services &rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Waveform Generator Section -->
+        <section id="waveform-generator-section" class="py-20 hero-bg">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                     <h2 class="text-3xl md:text-4xl font-bold text-header">Interactive Waveform Generator</h2>
+                     <p class="text-gray-400 mt-2">Experiment with additive synthesis in real-time.</p>
+                </div>
+                
+                <div class="max-w-7xl mx-auto">
+                    <!-- Waveform Display -->
+                    <div class="bg-control-panel p-4 rounded-t-lg">
+                        <canvas id="waveform-canvas" class="w-full h-48 md:h-64"></canvas>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="bg-control-panel p-4 md:p-6 rounded-b-lg shadow-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="oscillators-container">
+                            <!-- Oscillator 1 (template) -->
+                            <div class="bg-oscillator p-4 rounded-lg" id="osc1-controls">
+                                <h3 class="text-xl font-bold text-accent mb-3">Oscillator 1</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="flex justify-between text-sm"><span>Frequency</span><span class="value">1000 Hz</span></label>
+                                        <input type="range" class="w-full freq-slider" min="0" max="1" step="0.0001">
+                                    </div>
+                                    <div>
+                                        <label class="flex justify-between text-sm"><span>Amplitude</span><span class="value">0.50</span></label>
+                                        <input type="range" class="w-full amp-slider" min="0" max="1" step="0.01">
+                                    </div>
+                                    <div>
+                                        <label class="flex justify-between text-sm"><span>Phase</span><span class="value">0 &deg;</span></label>
+                                        <input type="range" class="w-full phase-slider" min="0" max="360" step="1">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-4 gap-1 mt-4 multiplier-buttons">
+                                    <button data-multiplier="2" class="btn-multiplier">x2</button>
+                                    <button data-multiplier="3" class="btn-multiplier">x3</button>
+                                    <button data-multiplier="5" class="btn-multiplier">x5</button>
+                                    <button data-multiplier="7" class="btn-multiplier">x7</button>
+                                    <button data-multiplier="0.5" class="btn-multiplier">/2</button>
+                                    <button data-multiplier="0.333333" class="btn-multiplier">/3</button>
+                                    <button data-multiplier="0.2" class="btn-multiplier">/5</button>
+                                    <button data-multiplier="0.142857" class="btn-multiplier">/7</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Master Controls -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center pt-4 border-t border-gray-700">
+                            <div class="flex gap-2">
+                                 <button id="master-mute-btn" class="w-1/2 btn-action font-semibold py-2 px-4 rounded-lg">Unmute</button>
+                                 <button id="harmonic-align-btn" class="w-1/2 btn-action font-semibold py-2 px-4 rounded-lg">Align</button>
+                            </div>
+                            <div class="md:col-span-2">
+                                 <label class="flex justify-between text-sm"><span>Master Volume</span><span id="master-vol-value" class="value">0.50</span></label>
+                                <input id="master-volume" type="range" class="w-full" min="0" max="1" step="0.01" value="0.5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Project/Song Section -->
+        <section class="hero-bg py-20">
+            <div class="container mx-auto px-6 text-center">
+                 <h2 class="text-3xl md:text-4xl font-bold text-header">Featured Work</h2>
+                 <div class="mt-8 max-w-2xl mx-auto card-bg rounded-xl shadow-lg p-8">
+                     <h3 class="text-2xl font-bold text-header">Dymanet - Phasor Gate Research</h3>
+                     <p class="text-gray-300 mt-2 mb-4">My current research is focused on developing a novel computational paradigm based on a new circuit component that can emulate a unitary matrix operation.
+                        This new component can be used to build a new type of arithmetic logic unit that is particularly well-suited for fast and efficient matrix operations, which are essential for many applications in machine learning, computer vision, and other fields.
+                     </p>
+                     <a href="gate_viz.html" class="btn-primary font-semibold py-2 px-5 rounded-lg">Phasor Gate Simulator</a>
+                 </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-2xl font-bold">Let's Connect</h3>
+            <p class="mt-2 mb-6 text-gray-400">Find me on social media, or send me an email through the Contact page.</p>
+            <div class="flex justify-center gap-6 mb-8">
+                <a href="https://github.com/tommychobo" class="text-gray-400 hover:text-white transition-colors" aria-label="GitHub">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.03-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
+                </a>
+                <a href="https://www.linkedin.com/in/thomas-choboter-b23b6b1b6/" class="text-gray-400 hover:text-white transition-colors" aria-label="LinkedIn">
+                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
+                <a href="https://www.youtube.com/@tommychobo3537" class="text-gray-400 hover:text-white transition-colors" aria-label="YouTube">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.75 15 L 15.94 12 L 10.75 9 Z M22,12c0,2.19-0.16,3.8-0.44,4.83c-0.25,0.9-0.83,1.48-1.73,1.73c-0.47,0.13-1.1,0.22-1.9,0.28 c-0.8,0.07-1.49,0.1-2.09,0.1L15,19c-2.19,0-3.8-0.16-4.83-0.44c-0.9-0.25-1.48-0.83-1.73-1.73 c-0.13-0.47-0.22-1.1-0.28-1.9c-0.07-0.8-0.1-1.49-0.1-2.09L8,12c0-2.19,0.16-3.8,0.44-4.83c0.25-0.9,0.83-1.48,1.73-1.73 c0.47-0.13,1.1-0.22,1.9-0.28c0.8-0.07,1.49-0.1,2.09-0.1L15,5c2.19,0,3.8,0.16,4.83,0.44c0.9,0.25,1.48,0.83,1.73,1.73 C21.84,8.2,22,9.81,22,12Z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/tommychobo/" class="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" /></svg>
+                </a>
+            </div>
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Logic for background scroller ---
+        const scroller = document.querySelector('.scroller__inner');
+        if (scroller) {
+            let images = Array.from(scroller.children);
+            // Shuffle the images
+            for (let i = images.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [images[i], images[j]] = [images[j], images[i]];
+            }
+            scroller.innerHTML = ''; // Clear existing images
+            images.forEach(img => scroller.appendChild(img)); // Append shuffled images
+
+            // Now duplicate the shuffled content for the seamless loop
+            const scrollerContent = Array.from(scroller.children);
+            scrollerContent.forEach(item => {
+                const duplicatedItem = item.cloneNode(true);
+                duplicatedItem.setAttribute('aria-hidden', true);
+                scroller.appendChild(duplicatedItem);
+            });
+        }
+
+        // --- Logic for Animated Title ---
+        const titleElement = document.getElementById('animated-title');
+        if (titleElement) {
+            const words = ["Math Tutoring", "Recording, Mixing, Mastering", "AI Integration", 
+                        "Computer Science Lessons", "Web Development", "Music Production", 
+                        "Tech Support", "Creative Coding", "Electronics Design",
+                        "Control Systems", "Digital Signal Processing", "Game Development",
+                        "Musician for Hire", "Hardware Design", "Custom MIDI Instruments", 
+                        "I Can Even Fix Printers", "Custom Guitar Pedals"];
+            let currentWord = words[Math.floor(Math.random() * words.length)];
+            let nextWord;
+            
+            const transitionWord = (current, next) => {
+                const maxLength = Math.max(current.length, next.length);
+                const currentPadded = current.padEnd(maxLength, ' ');
+                const nextPadded = next.padEnd(maxLength, ' ');
+                let tempWord = Array.from(currentPadded);
+                
+                let indices = Array.from(Array(maxLength).keys());
+                // Shuffle indices for random letter replacement
+                for (let i = indices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indices[i], indices[j]] = [indices[j], indices[i]];
+                }
+
+                let i = 0;
+                const interval = setInterval(() => {
+                    if(i < maxLength){
+                        const indexToChange = indices[i];
+                        tempWord[indexToChange] = nextPadded[indexToChange];
+                        titleElement.textContent = tempWord.join('');
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                        titleElement.textContent = next.trim();
+                        currentWord = next; // Set up for the next cycle
+                    }
+                }, 80); // Speed of letter transition
+            };
+
+            const cycleWords = () => {
+                do {
+                    nextWord = words[Math.floor(Math.random() * words.length)];
+                } while (nextWord === currentWord);
+                
+                transitionWord(currentWord, nextWord);
+            };
+            
+            titleElement.textContent = currentWord; // Set initial word
+            setInterval(cycleWords, 3000); // Change word every 3 seconds
+        }
+        
+        // --- Logic for Waveform Generator ---
+        const generatorContainer = document.getElementById('waveform-generator-section');
+        if (generatorContainer) {
+            const canvas = generatorContainer.querySelector('#waveform-canvas');
+            const ctx = canvas.getContext('2d');
+            let audioCtx = null; // Initialize on first interaction
+            let masterGain, oscillators = [];
+            const numOscillators = 4;
+            const minFreq = 20;
+            const maxFreq = 3000;
+            let isMuted = true; // Muted by default
+            let lastKnownVolume = 0.5;
+
+            const muteBtn = generatorContainer.querySelector('#master-mute-btn');
+            const masterVolumeSlider = generatorContainer.querySelector('#master-volume');
+
+            function initAudio() {
+                if (audioCtx) return; // Initialize only once
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.connect(audioCtx.destination);
+                
+                // Set initial state for mute
+                lastKnownVolume = parseFloat(masterVolumeSlider.value);
+                masterGain.gain.value = 0;
+                muteBtn.textContent = 'Unmute';
+                muteBtn.classList.add('bg-red-600');
+
+                const controlElements = generatorContainer.querySelectorAll('.bg-oscillator');
+                controlElements.forEach((panel, i) => {
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.type = 'sine';
+                    gainNode.connect(masterGain);
+                    oscillator.connect(gainNode);
+                    const freqSlider = panel.querySelector('.freq-slider');
+                    const ampSlider = panel.querySelector('.amp-slider');
+                    const phaseSlider = panel.querySelector('.phase-slider');
+                    const freqValueLabel = freqSlider.previousElementSibling.querySelector('.value');
+                    const ampValueLabel = ampSlider.previousElementSibling.querySelector('.value');
+                    const phaseValueLabel = phaseSlider.previousElementSibling.querySelector('.value');
+                    const state = { osc: oscillator, gain: gainNode, freqSlider, ampSlider, phaseSlider, freqValueLabel, ampValueLabel, phaseValueLabel, phase: 0 };
+                    
+                    const initialFreqLog = (Math.log(440) - Math.log(minFreq)) / (Math.log(maxFreq) - Math.log(minFreq));
+                    freqSlider.value = i === 0 ? initialFreqLog : Math.random();
+                    ampSlider.value = i === 0 ? 0.5 : 0;
+                    phaseSlider.value = 0;
+
+                    function updateFrequency() {
+                        if (!audioCtx) return;
+                        const logValue = parseFloat(freqSlider.value);
+                        const freq = minFreq * Math.pow(maxFreq / minFreq, logValue);
+                        state.osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                        freqValueLabel.textContent = `${Math.round(freq)} Hz`;
+                    }
+                    function updateAmplitude() {
+                        if (!audioCtx) return;
+                        const amp = parseFloat(ampSlider.value);
+                        state.gain.gain.setValueAtTime(amp, audioCtx.currentTime);
+                        ampValueLabel.textContent = amp.toFixed(2);
+                    }
+                    function updatePhase() {
+                        state.phase = (parseFloat(phaseSlider.value) * Math.PI) / 180;
+                        phaseValueLabel.textContent = `${phaseSlider.value} °`;
+                    }
+
+                    freqSlider.addEventListener('input', updateFrequency);
+                    ampSlider.addEventListener('input', updateAmplitude);
+                    phaseSlider.addEventListener('input', updatePhase);
+
+                    const multiplierButtons = panel.querySelector('.multiplier-buttons');
+                    multiplierButtons.addEventListener('click', (e) => {
+                        if (e.target.tagName === 'BUTTON' && audioCtx) {
+                            const multiplier = parseFloat(e.target.dataset.multiplier);
+                            let newFreq = state.osc.frequency.value * multiplier;
+                            newFreq = Math.max(minFreq, Math.min(maxFreq, newFreq));
+                            state.osc.frequency.setValueAtTime(newFreq, audioCtx.currentTime);
+                            const newLogValue = (Math.log(newFreq) - Math.log(minFreq)) / (Math.log(maxFreq) - Math.log(minFreq));
+                            state.freqSlider.value = newLogValue;
+                            state.freqValueLabel.textContent = `${Math.round(newFreq)} Hz`;
+                        }
+                    });
+
+                    const matchBtn = panel.querySelector('.btn-utility');
+                    if (matchBtn) {
+                         matchBtn.addEventListener('click', () => {
+                            if (!audioCtx) return;
+                            const sourceState = oscillators[0];
+                            const targetState = oscillators[i];
+                            targetState.freqSlider.value = sourceState.freqSlider.value;
+                            targetState.ampSlider.value = sourceState.ampSlider.value;
+                            targetState.phaseSlider.value = sourceState.phaseSlider.value;
+                            targetState.freqSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                            targetState.ampSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                            targetState.phaseSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                        });
+                    }
+
+                    updateFrequency();
+                    updateAmplitude();
+                    updatePhase();
+                    oscillator.start();
+                    oscillators.push(state);
+                });
+                drawWaveform(); // Start drawing once audio is initialized
+            }
+            
+            function createOscillatorControls() {
+                const container = generatorContainer.querySelector('#oscillators-container');
+                const template = generatorContainer.querySelector('#osc1-controls');
+                for (let i = 2; i <= numOscillators; i++) {
+                    const clone = template.cloneNode(true);
+                    clone.id = `osc${i}-controls`;
+                    clone.querySelector('h3').textContent = `Oscillator ${i}`;
+                    const matchButton = document.createElement('button');
+                    matchButton.textContent = 'Match O1';
+                    matchButton.className = 'btn-action btn-utility absolute top-3 right-3 rounded';
+                    clone.querySelector('h3').insertAdjacentElement('afterend', matchButton);
+                    container.appendChild(clone);
+                }
+            }
+            createOscillatorControls();
+            
+            // Set up master controls
+            const masterVolValue = generatorContainer.querySelector('#master-vol-value');
+            masterVolumeSlider.addEventListener('input', () => {
+                if (!audioCtx) return;
+                const newVolume = parseFloat(masterVolumeSlider.value);
+                masterVolValue.textContent = newVolume.toFixed(2);
+                lastKnownVolume = newVolume;
+                if (!isMuted) {
+                    masterGain.gain.setValueAtTime(newVolume, audioCtx.currentTime);
+                }
+            });
+            muteBtn.addEventListener('click', () => {
+                initAudio(); // Ensure audio context is started on first interaction
+                isMuted = !isMuted;
+                if (isMuted) {
+                    masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01);
+                    muteBtn.textContent = 'Unmute';
+                    muteBtn.classList.add('bg-red-600');
+                } else {
+                    masterGain.gain.setTargetAtTime(lastKnownVolume, audioCtx.currentTime, 0.01);
+                    muteBtn.textContent = 'Mute';
+                    muteBtn.classList.remove('bg-red-600');
+                }
+            });
+
+            generatorContainer.querySelector('#harmonic-align-btn').addEventListener('click', () => {
+                if(!audioCtx) return;
+                const baseFreq = oscillators[0].osc.frequency.value;
+                for (let i = 1; i < oscillators.length; i++) {
+                    const currentFreq = oscillators[i].osc.frequency.value;
+                    const ratio = currentFreq / baseFreq;
+                    const nearestMultiple = Math.round(ratio);
+                    const newFreq = baseFreq * (nearestMultiple > 0 ? nearestMultiple : 1);
+                    const newLogValue = (Math.log(newFreq) - Math.log(minFreq)) / (Math.log(maxFreq) - Math.log(minFreq));
+                    oscillators[i].freqSlider.value = newLogValue;
+                    oscillators[i].osc.frequency.setValueAtTime(newFreq, audioCtx.currentTime);
+                    oscillators[i].freqValueLabel.textContent = `${Math.round(newFreq)} Hz`;
+                }
+            });
+            
+            // This function draws a static placeholder until audio is initialized
+            function drawPlaceholderWaveform() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#4B5563'; // Muted color
+                ctx.moveTo(0, canvas.height / 2);
+                ctx.lineTo(canvas.width, canvas.height / 2);
+                ctx.stroke();
+            }
+
+            function drawWaveform() {
+                if(!audioCtx) {
+                    drawPlaceholderWaveform();
+                    requestAnimationFrame(drawWaveform);
+                    return;
+                }
+                requestAnimationFrame(drawWaveform);
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#FF0000';
+                ctx.shadowColor = '#FF0000';
+                ctx.shadowBlur = 10;
+                const timePeriod = (1 / 20) * 3;
+                const width = canvas.width;
+                const height = canvas.height;
+                const centerY = height / 2;
+                for (let x = 0; x < width; x++) {
+                    const t = (x / width) * timePeriod;
+                    let y = 0;
+                    for (const osc of oscillators) {
+                        y += osc.gain.gain.value * Math.sin(2 * Math.PI * osc.osc.frequency.value * t + osc.phase);
+                    }
+                    const plotY = centerY - (y * masterGain.gain.value * (height / 2.5));
+                    x === 0 ? ctx.moveTo(x, plotY) : ctx.lineTo(x, plotY);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0; 
+            }
+            drawWaveform();
+        }
+    });
+    </script>
+</body>
+</html>

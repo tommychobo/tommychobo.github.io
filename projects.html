@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Projects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cyber Noir -->
+    <!-- Application Structure Plan: A vertical-scrolling gallery page for projects. The structure is a series of detailed "project cards," where each card is a self-contained summary. This is ideal for a portfolio as it allows users to scan project titles and images quickly, then dive into the descriptions and links of those that capture their interest. -->
+    <!-- Visualization & Content Choices: Content: Project Cards -> Goal: Detail individual projects -> Presentation: A two-column layout within each card (image on left, text on right) -> Interaction: A set of clearly labeled buttons link out to live demos, code repositories, and documentation. -> Justification: This classic portfolio layout is highly effective. It separates visuals from text for clarity and provides clear, actionable next steps for users who want to explore a project more deeply. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+        .card-bg {
+            background-color: #1F2937; /* Dark Gray / Gray-800 */
+        }
+        .btn-action {
+            background-color: #4B5563; /* Dark Gray / Gray-600 */
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .tech-tag {
+            background-color: #4A5C50; /* Murky Green */
+            color: #E5E7EB; /* Gray-200 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation (Placeholder for Google Sites) -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                <!-- In Google Sites, you will build the navigation menu (Home, Projects, Music, etc.) using their UI. -->
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="resume.html" class="text-gray-300 hover:text-accent mx-3">R&eacute;sum&eacute;</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="#" class="text-accent mx-3 font-bold">Projects</a>
+                <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-header mb-2">Project Portfolio</h1>
+            <p class="text-lg text-gray-400 mb-12">A selection of software, hardware, and research projects.</p>
+
+            <div class="space-y-12">
+
+                <!-- Project 1: Phasor Gate Simulator -->
+                <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <div class="md:grid md:grid-cols-3 md:gap-8">
+                        <div class="md:col-span-1 mb-4 md:mb-0">
+                            <img src="project_docs/bimodal_transformer_geometry.png" alt="Phasor Gate Simulator Visualization" class="rounded-md object-cover w-full h-full" onerror="this.onerror=null; this.src='https://placehold.co/600x400';">
+                        </div>
+                        <div class="md:col-span-2">
+                            <h2 class="text-2xl md:text-3xl font-bold text-header mb-2">Phasor Gate Simulator</h2>
+                            <p class="text-gray-300 mb-4">
+                                An interactive web-based tool exploring the application of unitary matrix operations over time. This simulator models the behavior of a theoretical "Phasor Gate" circuit component, providing a visual representation of quantum state evolution.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">JavaScript</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">HTML5 Canvas</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">Linear Algebra</span>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <a href="gate_viz.html" class="btn-action font-semibold py-2 px-4 rounded-lg">View Simulator</a>
+                                <!--<a href="#" class="btn-action font-semibold py-2 px-4 rounded-lg">Source Code</a> -->
+                                <a href="project_docs/choboter_phasor_gate.pdf" class="btn-action font-semibold py-2 px-4 rounded-lg">Read The Paper</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Project 2: 3D Orbital Mechanics Explorer -->
+                <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <div class="md:grid md:grid-cols-3 md:gap-8">
+                        <div class="md:col-span-1 mb-4 md:mb-0">
+                             <img src="project_docs/orbit_explorer.png" alt="3D Orbital Mechanics Explorer" class="rounded-md object-cover w-full h-full" onerror="this.onerror=null; this.src='https://placehold.co/600x400';">
+                        </div>
+                        <div class="md:col-span-2">
+                            <h2 class="text-2xl md:text-3xl font-bold text-header mb-2">Orbital Mechanics Explorer</h2>
+                            <p class="text-gray-300 mb-4">
+                                A web-based 3D gravitational field simulator that allows users to explore and generate gravitational interactions between spheres of different sizes.
+                                This simulator is written entirely in JavaScript, and can be modified by inspecting the source code in your browser.
+                                It uses Three.js to render the 3D scene and WebGL for high-performance graphics.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">Three.js</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">JavaScript</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">WebGL</span>
+
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <a href="orbits.html" class="btn-action font-semibold py-2 px-4 rounded-lg">Explore Orbits</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3: MIDI RGB LEDs -->
+                <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <div class="md:grid md:grid-cols-3 md:gap-8">
+                        <div class="md:col-span-1 mb-4 md:mb-0">
+                             <img src="https://placehold.co/600x400/111827/DC143C?text=MIDI+LED" alt="MIDI Controlled LEDs" class="rounded-md object-cover w-full h-full" onerror="this.onerror=null; this.src='https://placehold.co/600x400';">
+                        </div>
+                        <div class="md:col-span-2">
+                            <h2 class="text-2xl md:text-3xl font-bold text-header mb-2">MIDI-Controlled RGB LEDs</h2>
+                            <p class="text-gray-300 mb-4">
+                                A hardware/software project that translates MIDI note instructions into vibrant, dynamic light shows. This system uses an Arduino to control a strip of programmable RGB LEDs, with a web interface for real-time visualization and control via the WebMIDI API.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">Arduino</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">C++</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">WebMIDI API</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">JavaScript</span>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <!--<a href="#" class="btn-action font-semibold py-2 px-4 rounded-lg">View Simulator</a>-->
+                                <a href="#" class="btn-action font-semibold py-2 px-4 rounded-lg">Source Code</a>
+                                <!--<a href="#" class="btn-action font-semibold py-2 px-4 rounded-lg">Build Guide</a>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <section id="support-me" class="text-center py-10">
+            <h2 class="text-2xl font-bold text-header">Like My Work?</h2>
+            <p class="text-gray-400 mt-2 mb-6 max-w-2xl mx-auto">If you find my projects, music, or services useful, consider supporting me with a small donation through PayPal. It helps fund new projects and keeps the creative engine running!</p>
+            <!-- IMPORTANT: Replace the '#' with your personal PayPal.Me link -->
+            <a href="https://www.paypal.me/tchoboter" target="_blank" rel="noopener noreferrer" class="inline-block btn-action font-semibold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-crimson-500/20">
+                ☕ Buy Me A Coffee
+            </a>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

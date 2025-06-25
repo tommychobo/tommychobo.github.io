@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <!-- Chosen Palette: Cyber Noir -->
+    <!-- Application Structure Plan: A dedicated page for events featuring a full-screen, interactive calendar. The layout prioritizes the calendar itself, with a simple header. The calendar is configured to be navigable (month/week/day views, next/prev buttons) and will display events loaded from a local data source. -->
+    <!-- Visualization & Content Choices: Content: Event Schedule -> Goal: Display upcoming events -> Presentation: Interactive Calendar Grid -> Interaction: View switching, navigation through time, clicking on events for details (future enhancement). -> Justification: A full calendar is the most intuitive and universally understood way to present date-based information, far superior to a simple list. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827;
+            color: #D1D5DB;
+        }
+        .text-accent { color: #22D3EE; }
+        .text-header { color: #F9FAFB; }
+        .section-bg { background-color: #1F2937; }
+        .blog-post-bg { background-color: #1F2937; }
+        
+        /* FullCalendar Custom Theme */
+        :root {
+          --fc-border-color: #374151;
+          --fc-daygrid-event-dot-width: 8px;
+          --fc-list-event-dot-width: 10px;
+          --fc-list-event-hover-bg-color: #374151;
+        }
+        .fc {
+            background-color: #1F2937;
+            color: #D1D5DB;
+        }
+        .fc .fc-toolbar-title {
+            color: #F9FAFB;
+        }
+        .fc .fc-button-primary {
+            background-color: #4A5C50;
+            border-color: #4A5C50;
+            color: #F9FAFB;
+        }
+        .fc .fc-button-primary:hover {
+            background-color: #DC143C;
+            border-color: #DC143C;
+        }
+        .fc .fc-button-primary:active, .fc .fc-button-primary:focus {
+             box-shadow: 0 0 0 0.2rem rgba(220, 20, 60, 0.5);
+        }
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: rgba(34, 211, 238, 0.15);
+        }
+        .fc .fc-daygrid-day-number {
+            color: #D1D5DB;
+        }
+        .fc .fc-col-header-cell-cushion {
+             color: #E5E7EB;
+        }
+        .fc-event {
+            background-color: #4B5563 !important;
+            border-color: #4B5563 !important;
+        }
+        .fc-event-title {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="resume.html" class="text-gray-300 hover:text-accent mx-3">R&eacute;sum&eacute;</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
+                <a href="#" class="text-accent mx-3 font-bold">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-7xl mx-auto">
+             <div class="text-center mb-12">
+                 <h1 class="text-4xl md:text-5xl font-bold text-header">Upcoming Events</h1>
+                 <p class="text-lg text-gray-400 mt-2">Live performances, workshops, and project deadlines.</p>
+            </div>
+            
+            <div id='calendar' class="p-4 md:p-6 section-bg rounded-lg shadow-lg"></div>
+
+            <!-- TODO: Blog Section -->
+            
+
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        
+        // This is where you would load your calendar data.
+        // For now, it's populated with placeholder events.
+        // You can generate this array from an .ics file using an online converter.
+        const eventsData = [
+          {
+            title: 'Live Performance @ The Frog & Fiddle',
+            start: '2025-07-18T20:00:00',
+            end: '2025-07-18T23:00:00',
+            color: '#DC143C' // Crimson
+          },
+          {
+            title: 'Synth Workshop',
+            start: '2025-07-22',
+            allDay: true
+          },
+          {
+            title: 'Project Deadline: "Aurora"',
+            start: '2025-08-01'
+          },
+          {
+            title: 'Jazz Combo @ Linnaea\'s Cafe',
+            start: '2025-08-09T19:00:00',
+            color: '#22D3EE' // Cyan
+          }
+        ];
+
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          },
+          events: eventsData,
+          editable: false, // Set to true if you want to allow dragging events
+          selectable: true,
+          dayMaxEvents: true, // allow "more" link when too many events
+        });
+
+        calendar.render();
+      });
+    </script>
+
+</body>
+</html>

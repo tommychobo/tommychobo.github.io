@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generalized Phasor Gate Design Workbench</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .slider-label { @apply text-sm font-medium text-gray-700 mb-1 block; }
+        .plot-container { @apply bg-white rounded-lg shadow-md p-4; }
+        .control-panel { @apply bg-white rounded-lg shadow-md p-6; }
+        .validity-box { @apply mt-4 p-3 rounded-lg text-center font-semibold text-sm; }
+        .input-group { @apply flex items-center space-x-2; }
+        .text-input { @apply w-24 text-sm p-1 border border-gray-300 rounded-md text-center; }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">Generalized Phasor Gate Design Workbench</h1>
+            <p class="mt-2 text-lg text-gray-600">A Simulator for Exploring Harmonic Computation Architectures</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Control Panel -->
+            <div class="lg:col-span-3 space-y-8">
+                <!-- CORRECTED ORDER: Input State Panel is now first -->
+                <div class="control-panel">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Input State</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="input-phase-slider" class="slider-label">Input State (θ/2)</label>
+                            <div class="input-group"><input id="input-phase-slider" type="range" min="0" max="1.57079" value="0" step="0.01" class="w-full"><input id="input-phase-input" type="text" class="text-input"></div>
+                            <div class="text-xs text-gray-500 mt-1">Controls amplitudes a = cos(θ/2), b = sin(θ/2)</div>
+                        </div>
+                         <div>
+                            <label for="phi1-slider" class="slider-label">f₁ Phase (φ₁)</label>
+                            <div class="input-group"><input id="phi1-slider" type="range" min="-3.14159" max="3.14159" value="0.0" step="0.01" class="w-full"><input id="phi1-input" type="text" class="text-input"></div>
+                        </div>
+                        <div>
+                            <label for="phi2-slider" class="slider-label">f₂ Phase (φ₂)</label>
+                            <div class="input-group"><input id="phi2-slider" type="range" min="-3.14159" max="3.14159" value="0.0" step="0.01" class="w-full"><input id="phi2-input" type="text" class="text-input"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CORRECTED ORDER: Operational Controls Panel is now second -->
+                <div class="control-panel">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Operational Controls</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="theta-slider" class="slider-label">Quasimodal Phase (Θ)</label>
+                            <div class="input-group">
+                                <input id="theta-slider" type="range" min="-3.14159" max="3.14159" value="1.57079" step="0.01" class="w-full">
+                                <input id="theta-input" type="text" class="text-input">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="tau-slider" class="slider-label">Interaction Time (τ) [µs]</label>
+                             <div class="input-group">
+                                <input id="tau-slider" type="range" min="1" max="500" value="50" step="1" class="w-full">
+                                <input id="tau-input" type="number" step="1" class="text-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CORRECTED ORDER: System Parameters Panel is now last -->
+                <div class="control-panel">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">System Parameters</h2>
+                     <div class="space-y-4">
+                        <div>
+                            <label for="f1-slider" class="slider-label">Frequency f₁ (kHz)</label>
+                            <div class="input-group"><input id="f1-slider" type="range" min="50" max="500" value="100" step="1" class="w-full"><input id="f1-input" type="number" step="1" class="text-input"></div>
+                        </div>
+                        <div>
+                            <label for="f2-slider" class="slider-label">Frequency f₂ (kHz)</label>
+                            <div class="input-group"><input id="f2-slider" type="range" min="50" max="500" value="120" step="1" class="w-full"><input id="f2-input" type="number" step="1" class="text-input"></div>
+                        </div>
+                        <div>
+                            <label for="g_p-slider" class="slider-label">P-Mode Mixing (G_P) (kHz)</label>
+                            <div class="input-group"><input id="g_p-slider" type="range" min="0" max="10" value="0" step="0.1" class="w-full"><input id="g_p-input" type="number" step="0.1" class="text-input"></div>
+                        </div>
+                        <div>
+                            <label for="g_t0-slider" class="slider-label">T-Mode Mixing (G_T0) (kHz)</label>
+                            <div class="input-group"><input id="g_t0-slider" type="range" min="0.1" max="10" value="2" step="0.1" class="w-full"><input id="g_t0-input" type="number" step="0.1" class="text-input"></div>
+                        </div>
+                         <div>
+                            <label for="kappa-slider" class="slider-label">P-T Coupling (κ') (kHz)</label>
+                           <div class="input-group"><input id="kappa-slider" type="range" min="0.1" max="20" value="5" step="0.1" class="w-full"><input id="kappa-input" type="number" step="0.1" class="text-input"></div>
+                        </div>
+                        <div id="validity-check-container" class="validity-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="lg:col-span-9 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="plot-container h-64"><canvas id="input-waveform-canvas"></canvas></div>
+                    <div class="plot-container h-64"><canvas id="output-waveform-canvas"></canvas></div>
+                    <div class="plot-container h-80 relative"><canvas id="component-f1-canvas"></canvas></div>
+                    <div class="plot-container h-80 relative"><canvas id="component-f2-canvas"></canvas></div>
+                </div>
+                <div class="plot-container min-h-[600px]" id="bloch-sphere-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+        // --- CUSTOM COMPLEX NUMBER CLASS ---
+        class Complex { /* ... implementation from previous version ... */ constructor(r,i){this.real=r||0;this.imag=i||0}add(o){return new Complex(this.real+o.real,this.imag+o.imag)}mul(o){return new Complex(this.real*o.real-this.imag*o.imag,this.real*o.imag+this.imag*o.real)}conjugate(){return new Complex(this.real,-this.imag)}abs(){return Math.sqrt(this.real**2+this.imag**2)}angle(){return Math.atan2(this.imag,this.real)}div(o){const d=o.real**2+o.imag**2;if(d===0)return new Complex(Infinity,Infinity);return new Complex((this.real*o.real+this.imag*o.imag)/d,(this.imag*o.real-this.real*o.imag)/d)}}
+
+        const controls = {
+            theta: { slider: document.getElementById('theta-slider'), input: document.getElementById('theta-input'), isPhase: true },
+            tau: { slider: document.getElementById('tau-slider'), input: document.getElementById('tau-input') },
+            input_phase: { slider: document.getElementById('input-phase-slider'), input: document.getElementById('input-phase-input'), isPhase: true },
+            phi1: { slider: document.getElementById('phi1-slider'), input: document.getElementById('phi1-input'), isPhase: true },
+            phi2: { slider: document.getElementById('phi2-slider'), input: document.getElementById('phi2-input'), isPhase: true },
+            f1: { slider: document.getElementById('f1-slider'), input: document.getElementById('f1-input') },
+            f2: { slider: document.getElementById('f2-slider'), input: document.getElementById('f2-input') },
+            g_p: { slider: document.getElementById('g_p-slider'), input: document.getElementById('g_p-input') },
+            g_t0: { slider: document.getElementById('g_t0-slider'), input: document.getElementById('g_t0-input') },
+            kappa: { slider: document.getElementById('kappa-slider'), input: document.getElementById('kappa-input') },
+        };
+        const validityContainer = document.getElementById('validity-check-container');
+        const canvases = { input: document.getElementById('input-waveform-canvas'), output: document.getElementById('output-waveform-canvas'), f1: document.getElementById('component-f1-canvas'), f2: document.getElementById('component-f2-canvas') };
+        let chartInstances = {};
+        let three_scene, three_camera, three_renderer, three_controls, three_trajectoryLine, three_startPoint, three_endPoint;
+
+        function setupBlochSphere() { /* ... implementation from previous version ... */ const container=document.getElementById('bloch-sphere-container');three_scene=new THREE.Scene();three_camera=new THREE.PerspectiveCamera(75,container.clientWidth/container.clientHeight,0.1,1e3);three_camera.position.set(1.5,1,1.5);three_renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});container.appendChild(three_renderer.domElement);three_controls=new OrbitControls(three_camera,three_renderer.domElement);three_controls.enableDamping=true;const sphereGeom=new THREE.SphereGeometry(1,32,32);const wireframe=new THREE.LineSegments(new THREE.WireframeGeometry(sphereGeom));wireframe.material.color.set(13421772);wireframe.material.opacity=0.2;wireframe.material.transparent=true;three_scene.add(wireframe);const axes=['x','y','z'];axes.forEach(axis=>{const material=new THREE.LineBasicMaterial({color:3355443,opacity:0.5,transparent:true});const points=[new THREE.Vector3(-1.2,0,0),new THREE.Vector3(1.2,0,0)];const geometry=new THREE.BufferGeometry().setFromPoints(points);const line=new THREE.Line(geometry,material);if(axis==='y')line.rotation.z=Math.PI/2;if(axis==='z')line.rotation.y=Math.PI/2;three_scene.add(line)});const loader=new FontLoader;loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',function(font){const options={font:font,size:0.1,height:0.01,bevelEnabled:false};const material=new THREE.MeshBasicMaterial({color:3355443});const labels={x:new TextGeometry('X',options),y:new TextGeometry('Y',options),z:new TextGeometry('Z',options)};const xMesh=new THREE.Mesh(labels.x,material);xMesh.position.set(1.3,0,0);const yMesh=new THREE.Mesh(labels.y,material);yMesh.position.set(0,1.3,0);const zMesh=new THREE.Mesh(labels.z,material);zMesh.position.set(0,0,1.3);three_scene.add(xMesh,yMesh,zMesh)});three_trajectoryLine=new THREE.Line(new THREE.BufferGeometry,new THREE.LineBasicMaterial({color:1999871,linewidth:3}));three_scene.add(three_trajectoryLine);const pointGeom=new THREE.SphereGeometry(0.05,16,16);three_startPoint=new THREE.Mesh(pointGeom,new THREE.MeshBasicMaterial({color:2278742}));three_endPoint=new THREE.Mesh(pointGeom,new THREE.MeshBasicMaterial({color:15678020}));three_scene.add(three_startPoint,three_endPoint)}
+
+        function runSimulation(params) {
+            const { G_P_hz, G_T0_hz, kappa_hz, theta, tau, a_amp, b_amp, phi1, phi2 } = params;
+            const G_P = new Complex(0, G_P_hz); 
+            const G_T = new Complex(G_T0_hz * Math.cos(theta), -G_T0_hz * Math.sin(theta));
+            const H_eff = [[new Complex(0), G_P.conjugate(), new Complex(kappa_hz), new Complex(0)], [G_P, new Complex(0), new Complex(0), new Complex(kappa_hz)], [new Complex(kappa_hz), new Complex(0), new Complex(0), G_T.conjugate()], [new Complex(0), new Complex(kappa_hz), G_T, new Complex(0)]];
+            function harmonic_system(t, A, H) { let Adot=Array(4).fill(null).map(()=>new Complex);for(let i=0;i<4;i++){for(let j=0;j<4;j++){Adot[i]=Adot[i].add((new Complex(0,-1)).mul(H[i][j]).mul(A[j]))}}return Adot }
+            function rk4_step(t, A, dt, H) { const k1=harmonic_system(t,A,H);const k2=harmonic_system(t+dt/2,A.map((v,i)=>v.add(k1[i].mul(new Complex(dt/2)))),H);const k3=harmonic_system(t+dt/2,A.map((v,i)=>v.add(k2[i].mul(new Complex(dt/2)))),H);const k4=harmonic_system(t+dt,A.map((v,i)=>v.add(k3[i].mul(new Complex(dt)))),H);return A.map((v,i)=>v.add((k1[i].add(k2[i].mul(new Complex(2))).add(k3[i].mul(new Complex(2))).add(k4[i])).mul(new Complex(dt/6)))) }
+            const n_steps = 500;
+            const dt = tau / n_steps;
+            const t_eval = Array.from({length: n_steps + 1}, (_, i) => i * dt);
+            let A_t = [ new Complex(a_amp * Math.cos(phi1), a_amp * Math.sin(phi1)), new Complex(b_amp * Math.cos(phi2), b_amp * Math.sin(phi2)), new Complex(), new Complex() ];
+            const history = [A_t];
+            for (let i = 0; i < n_steps; i++) { A_t = rk4_step(t_eval[i], A_t, dt, H_eff); history.push(A_t); }
+            return { t_eval, history };
+        }
+        
+        function updateAndDraw() {
+            const params = {};
+            for (const key in controls) {
+                params[key] = parseFloat(controls[key].slider.value);
+            }
+            params.a_amp = Math.cos(params.input_phase);
+            params.b_amp = Math.sin(params.input_phase);
+            
+            const { t_eval, history } = runSimulation({
+                theta: params.theta, tau: params.tau * 1e-6,
+                a_amp: params.a_amp, b_amp: params.b_amp,
+                phi1: params.phi1, phi2: params.phi2,
+                f1: params.f1 * 1e3, f2: params.f2 * 1e3,
+                G_P_hz: params.g_p * 1e3, G_T0_hz: params.g_t0 * 1e3,
+                kappa_hz: params.kappa * 1e3
+            });
+            
+            const T1_t = history.map(h => h[2]); const T2_t = history.map(h => h[3]);
+            const w1=2*Math.PI*params.f1*1e3, w2=2*Math.PI*params.f2*1e3;
+            const Vi_t = t_eval.map((t) => params.a_amp * Math.cos(w1*t + params.phi1) + params.b_amp * Math.cos(w2*t + params.phi2));
+            const Vo_t = t_eval.map((t, i) => T1_t[i].real * Math.cos(w1*t) - T1_t[i].imag * Math.sin(w1*t) + T2_t[i].real * Math.cos(w2*t) - T2_t[i].imag * Math.sin(w2*t));
+            updateChart(canvases.input, 'input', 'Input Waveform (Vi)', t_eval, [{ data: Vi_t, color: 'midnightblue'}]);
+            updateChart(canvases.output, 'output', 'Output Waveform (Vo)', t_eval, [{ data: Vo_t, color: 'crimson'}]);
+            updatePhaseChart(canvases.f1, 'f1', '|f₁⟩ Component Evolution', t_eval, T1_t.map(v => v.abs()), T1_t.map(v => v.angle()));
+            updatePhaseChart(canvases.f2, 'f2', '|f₂⟩ Component Evolution', t_eval, T2_t.map(v => v.abs()), T2_t.map(v => v.angle()));
+
+            const norm_T = T1_t.map((v, i) => Math.sqrt(v.abs()**2 + T2_t[i].abs()**2));
+            norm_T.forEach((n,i) => { if (n < 1e-9) norm_T[i] = 1e-9; });
+            const T1_norm = T1_t.map((v, i) => v.div(new Complex(norm_T[i])));
+            const T2_norm = T2_t.map((v, i) => v.div(new Complex(norm_T[i])));
+            const x_b = T1_norm.map((v, i) => 2 * v.conjugate().mul(T2_norm[i]).real);
+            const y_b = T1_norm.map((v, i) => 2 * v.conjugate().mul(T2_norm[i]).imag);
+            const z_b = T1_norm.map((v, i) => v.abs()**2 - T2_norm[i].abs()**2);
+            three_trajectoryLine.geometry.setFromPoints(x_b.map((x, i) => new THREE.Vector3(x, y_b[i], z_b[i]))); 
+            const firstValidIdx = norm_T.findIndex(n => n > 0.05) ?? 0;
+            three_startPoint.position.set(x_b[firstValidIdx], y_b[firstValidIdx], z_b[firstValidIdx]);
+            three_endPoint.position.set(x_b.at(-1), y_b.at(-1), z_b.at(-1));
+
+            const effective_rabi_strength = Math.sqrt((params.g_t0*1e3)**2 + (params.g_p*1e3)**2 + (params.kappa*1e3)**2);
+            const freq_diff = Math.abs(params.f2*1e3 - params.f1*1e3);
+            if (effective_rabi_strength > freq_diff / 5) { validityContainer.textContent = `Unreliable (RWA Fails)`; validityContainer.className = 'validity-box bg-red-100 text-red-800'; } 
+            else { validityContainer.textContent = `Computation Reliable`; validityContainer.className = 'validity-box bg-green-100 text-green-800'; }
+        }
+        
+        const rainbowCmap = new LinearSegmentedColormap([ { value: -Math.PI, color: '#ff8c00' }, { value: -Math.PI/2, color: '#ff00ff' }, { value: 0, color: '#0000ff' }, { value: Math.PI/2, color: '#00ff00' }, { value: Math.PI, color: '#ff8c00' } ]);
+        function updateChart(canvas, chartId, title, labels, datasets) { const ctx = canvas.getContext('2d'); if (chartInstances[chartId]) chartInstances[chartId].destroy(); chartInstances[chartId] = new Chart(ctx, { type: 'line', data: { labels: labels.map(l=>(l*1e6).toFixed(1)), datasets: datasets.map(d => ({...d, borderWidth: 2, pointRadius: 0, tension: 0.1})) }, options: { animation: false, responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { beginAtZero: false } }, plugins: { legend: { display: false }, title: { display: true, text: title, font: { size: 16 }, color: '#111827'} } } }); }
+        function updatePhaseChart(canvas, chartId, title, x, y, phase) { const ctx = canvas.getContext('2d'); if (chartInstances[chartId]) chartInstances[chartId].destroy(); const segmentColors = phase.slice(0,-1).map(p => rainbowCmap.getColor(p)); chartInstances[chartId] = new Chart(ctx, { type: 'line', data: { labels: x.map(l=>(l*1e6).toFixed(1)), datasets: [{ data: y, borderWidth: 2.5, pointRadius: 0, tension: 0.1, segment: { borderColor: ctx => segmentColors[ctx.p0DataIndex] || '#374151' } }] }, options: { animation: false, responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }, grid: { display: false }, title:{display:true, text:'Time (µs)'} }, y: { min: -0.05, max: 1.05, title:{display:true, text:'Magnitude'} } }, plugins: { legend: { display: false }, title: { display: true, text: title, font: { size: 16 }, color: '#111827'} } } }); }
+        function LinearSegmentedColormap(colorStops) { this.stops = colorStops.sort((a,b) => a.value - b.value); this.getColor = function(value) { const minVal = this.stops[0].value; const maxVal = this.stops[this.stops.length - 1].value; const normVal = (value - minVal) / (maxVal - minVal); if (normVal <= 0) return this.stops[0].color; if (normVal >= 1) return this.stops[this.stops.length - 1].color; let stop1, stop2; for (let i = 0; i < this.stops.length - 1; i++) { if (normVal >= (this.stops[i].value - minVal)/(maxVal - minVal) && normVal <= (this.stops[i+1].value - minVal)/(maxVal - minVal)) { stop1 = this.stops[i]; stop2 = this.stops[i+1]; break; } } const t = (value - stop1.value) / (stop2.value - stop1.value); const r = Math.round(parseInt(stop1.color.slice(1,3), 16) * (1-t) + parseInt(stop2.color.slice(1,3), 16) * t); const g = Math.round(parseInt(stop1.color.slice(3,5), 16) * (1-t) + parseInt(stop2.color.slice(3,5), 16) * t); const b = Math.round(parseInt(stop1.color.slice(5,7), 16) * (1-t) + parseInt(stop2.color.slice(5,7), 16) * t); return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`; } }
+
+        Object.keys(controls).forEach(key => {
+            const { slider, input, isPhase } = controls[key];
+            slider.addEventListener('input', () => {
+                if (isPhase) { input.value = `${(slider.value / Math.PI).toFixed(2)} π`; } 
+                else { input.value = slider.value; }
+                updateAndDraw();
+            });
+            input.addEventListener('change', () => {
+                let numericValue;
+                if (isPhase) {
+                    let textValue = input.value.toLowerCase().replace(/π/g, 'pi');
+                    numericValue = (parseFloat(textValue) || 0) * (textValue.includes('pi') ? Math.PI : 1);
+                } else {
+                    numericValue = parseFloat(input.value);
+                }
+                if (!isNaN(numericValue)) { slider.value = numericValue; updateAndDraw(); }
+            });
+        });
+
+        function animate() { requestAnimationFrame(animate); if(three_controls) three_controls.update(); if(three_renderer && three_scene && three_camera) three_renderer.render(three_scene, three_camera); }
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('bloch-sphere-container');
+            const width = container.clientWidth; const height = Math.max(width * 0.75, 500); 
+            if(three_camera) { three_camera.aspect = width / height; three_camera.updateProjectionMatrix(); three_renderer.setSize(width, height); }
+        });
+
+        // Initialize
+        setupBlochSphere();
+        const initialWidth = document.getElementById('bloch-sphere-container').clientWidth;
+        const initialHeight = Math.max(initialWidth * 0.75, 500);
+        three_renderer.setSize(initialWidth, initialHeight);
+        three_camera.aspect = initialWidth / initialHeight;
+        three_camera.updateProjectionMatrix();
+        Object.keys(controls).forEach(key => {
+             const { slider, input, isPhase } = controls[key];
+             if(isPhase) input.value = `${(slider.value / Math.PI).toFixed(2)} π`;
+             else input.value = slider.value;
+        });
+        updateAndDraw();
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Orbital Mechanics Simulator</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: white;
+            font-family: 'Share Tech Mono', monospace; /* Matching your site's theme */
+        }
+        canvas {
+            display: block;
+        }
+        #info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            border: 1px solid #4A5C50;
+            font-size: 14px;
+            line-height: 1.6;
+            z-index: 10;
+        }
+        #escape-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            padding: 2rem;
+            background: #1F2937;
+            border: 2px solid #22D3EE;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
+            text-align: center;
+            display: flex; /* Changed to flex */
+            flex-direction: column;
+            z-index: 10;
+        }
+        #escape-menu h2 {
+            margin-top: 0;
+            color: #22D3EE;
+        }
+        .color-swatch-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .color-swatch.selected {
+            border-color: #FFFFFF;
+        }
+        #charging-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 20px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #4A5C50;
+            border-radius: 5px;
+            display: none;
+        }
+        #charge-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #DC143C; /* Crimson */
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+        /* Styles for new projectile speed slider */
+        .menu-slider {
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+        .menu-slider label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="info-panel">
+        <strong>Controls:</strong><br>
+        - <strong>R:</strong> Toggle Sim/Menu<br>
+        - <strong>WASD:</strong> Apply Thrust<br>
+        - <strong>Space/Shift:</strong> Up/Down Thrust<br>
+        - <strong>Hold 'E':</strong> Charge & Fire Sphere<br>
+        - <strong>Z / C:</strong> Roll Camera<br>
+        - <strong>Q:</strong> Focus on Largest Mass<br>
+        - <strong>ESC:</strong> Open Menu
+    </div>
+    
+    <div id="escape-menu">
+        <h2>Select Sphere Color</h2>
+        <div id="color-picker" class="color-swatch-container">
+            <!-- Swatches will be added by JS -->
+        </div>
+        <div class="menu-slider">
+            <label for="projectile-speed"><span>Projectile Speed</span><span id="speed-value">25</span></label>
+            <input type="range" id="projectile-speed" min="1" max="100" value="25">
+        </div>
+    </div>
+    
+    <div id="charging-indicator">
+        <div id="charge-bar"></div>
+    </div>
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.151.3/build/three.module.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- SCENE DATA (replaces hardcoded initScene) ---
+        const sceneDataJson = `
+        {
+            "cameraStart": { "pos": [0, 200, 700], "lookAt": [0,0,0] },
+            "bodies": [
+                {
+                    "mass": 10000,
+                    "pos": [-250, 0, 0],
+                    "vel": [-1, 0, 0],
+                    "color": "0xff2277",
+                    "type": "natural"
+                },
+                {
+                    "mass": 10000,
+                    "pos": [250, 0, 0],
+                    "vel": [0, -1, 0],
+                    "color": "0xffdd00",
+                    "type": "natural"
+                },
+                {
+                    "mass": 10000,
+                    "pos": [0, -300, 0],
+                    "vel": [0, 0, 0],
+                    "color": "0x00ddff",
+                    "type": "natural"
+                },
+                {"mass": 1, "pos": [50, 50, 50], "vel": [0,0,0], "color": "0x8B5CF6", "type": "natural"},
+                {"mass": 1, "pos": [-50, -50, -50], "vel": [0,0,0], "color": "0x8B5CF6", "type": "natural"},
+                {"mass": 1, "pos": [150, 0, 150], "vel": [0,0,0], "color": "0x4A5C50", "type": "natural"},
+                {"mass": 1, "pos": [-150, 0, -150], "vel": [0,0,0], "color": "0x4A5C50", "type": "natural"},
+                {"mass": 1, "pos": [0, 150, 0], "vel": [0,0,0], "color": "0xDC143C", "type": "natural"},
+                {"mass": 1, "pos": [0, -150, 0], "vel": [0,0,0], "color": "0xDC143C", "type": "natural"},
+                {"mass": 1, "pos": [250, 250, 0], "vel": [0,0,0], "color": "0xffffff", "type": "natural"},
+                {"mass": 1, "pos": [-250, -250, 0], "vel": [0,0,0], "color": "0xffffff", "type": "natural"},
+                {"mass": 1, "pos": [0, 0, 250], "vel": [0,0,0], "color": "0x22D3EE", "type": "natural"},
+                {"mass": 1, "pos": [0, 0, -250], "vel": [0,0,0], "color": "0x22D3EE", "type": "natural"}
+            ]
+        }
+        `;
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        // --- CONSTANTS AND STATE ---
+        const GRAV_CONSTANT = 0.025;
+        const BOUNDARY_RADIUS = 5000;
+        let spheres = [];
+        const cameraPhysics = {
+            velocity: new THREE.Vector3(),
+            mass: 1,
+            radius: 1,
+            thrust: new THREE.Vector3()
+        };
+        let shootingColor = new THREE.Color(0x22D3EE);
+        let projectileBaseSpeed = 10;
+
+        // --- CONTROLS SETUP ---
+        let isPaused = true;
+        let isPointerLocked = false;
+        let eChargeStartTime = 0;
+        let lockedFireDirection = null;
+        let chargingSphere = null;
+        const keys = {};
+
+        // --- LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        // --- INITIAL SCENE OBJECTS ---
+        function initScene() {
+            const data = JSON.parse(sceneDataJson);
+            
+            data.bodies.forEach(body => {
+                const pos = new THREE.Vector3(...body.pos);
+                const vel = new THREE.Vector3(...body.vel);
+                const color = new THREE.Color(parseInt(body.color, 16));
+                
+                const newSphere = createSphere(body.mass, pos, vel, color, body.type);
+                
+                if(body.mass >= 10000) {
+                    const light = new THREE.PointLight(color, 2, 10000);
+                    light.position.copy(pos);
+                    scene.add(light);
+                    newSphere.light = light; 
+                }
+            });
+
+            camera.position.set(...data.cameraStart.pos);
+            camera.lookAt(new THREE.Vector3(...data.cameraStart.lookAt));
+        }
+
+        // --- OBJECT CREATION ---
+        function createSphere(mass, position, velocity, color, type = 'projectile') {
+            const radius = Math.cbrt(mass);
+            const geometry = new THREE.SphereGeometry(radius, 32, 32);
+            const material = new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.2 });
+            const sphereMesh = new THREE.Mesh(geometry, material);
+            sphereMesh.position.copy(position);
+
+            const sphereObject = {
+                mesh: sphereMesh,
+                velocity: velocity,
+                radius: radius,
+                mass: mass,
+                type: type
+            };
+
+            spheres.push(sphereObject);
+            scene.add(sphereMesh);
+            return sphereObject;
+        }
+        
+        // --- UI & MENU ---
+        const escapeMenu = document.getElementById('escape-menu');
+        const colorPicker = document.getElementById('color-picker');
+        const speedSlider = document.getElementById('projectile-speed');
+        const speedValue = document.getElementById('speed-value');
+        const availableColors = [0x22D3EE, 0xDC143C, 0x4A5C50, 0xffdd00, 0x8B5CF6, 0xffffff];
+
+        function setupMenu() {
+            colorPicker.innerHTML = '';
+            availableColors.forEach(colorHex => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = `#${colorHex.toString(16).padStart(6, '0')}`;
+                if (colorHex === shootingColor.getHex()) {
+                    swatch.classList.add('selected');
+                }
+                swatch.addEventListener('click', () => {
+                    shootingColor.setHex(colorHex);
+                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                    swatch.classList.add('selected');
+                });
+                colorPicker.appendChild(swatch);
+            });
+            speedSlider.addEventListener('input', (e) => {
+                projectileBaseSpeed = parseFloat(e.target.value);
+                speedValue.textContent = projectileBaseSpeed;
+            });
+            speedSlider.value = projectileBaseSpeed;
+            speedValue.textContent = projectileBaseSpeed;
+        }
+
+        // --- EVENT LISTENERS ---
+        document.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; handleKeyDown(e); });
+        document.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; handleKeyUp(e); });
+        document.addEventListener('mousemove', (e) => { if (isPointerLocked) handleMouseMove(e); });
+        document.addEventListener('pointerlockchange', () => { 
+            isPointerLocked = document.pointerLockElement === document.body;
+        });
+        window.addEventListener('resize', onWindowResize);
+        
+        function handleKeyDown(e) {
+            const key = e.key.toLowerCase();
+            if (key === 'escape') {
+                isPaused = true;
+                document.exitPointerLock();
+                escapeMenu.style.display = 'flex';
+            }
+            if (key === 'r') {
+                isPaused = !isPaused;
+                if (isPaused) {
+                    document.exitPointerLock();
+                    escapeMenu.style.display = 'flex';
+                } else {
+                    document.body.requestPointerLock();
+                    escapeMenu.style.display = 'none';
+                }
+            }
+            if (key === 'e' && !isPaused && eChargeStartTime === 0) {
+                eChargeStartTime = Date.now();
+                lockedFireDirection = new THREE.Vector3();
+                camera.getWorldDirection(lockedFireDirection);
+                
+                const position = camera.position.clone().add(lockedFireDirection.clone().multiplyScalar(5));
+                chargingSphere = createSphere(0.1, position, new THREE.Vector3(), shootingColor);
+                
+                document.getElementById('charging-indicator').style.display = 'block';
+            }
+            if (key === 'q' && !isPaused) {
+                focusOnLargestMass();
+            }
+        }
+        
+        function handleKeyUp(e) {
+            if (e.key === 'e' && eChargeStartTime > 0) {
+                const chargeTime = (Date.now() - eChargeStartTime) / 1000;
+                
+                const firedSphereData = { ...chargingSphere };
+                
+                scene.remove(chargingSphere.mesh);
+                chargingSphere.mesh.geometry.dispose();
+                chargingSphere.mesh.material.dispose();
+                spheres = spheres.filter(s => s !== chargingSphere);
+                chargingSphere = null;
+
+                fireSphere(chargeTime, firedSphereData);
+
+                eChargeStartTime = 0;
+                document.getElementById('charging-indicator').style.display = 'none';
+                document.getElementById('charge-bar').style.width = '0%';
+            }
+        }
+        
+        function handleMouseMove(e) {
+            if (!isPointerLocked) return;
+            const movementX = e.movementX || 0;
+            const movementY = e.movementY || 0;
+            const sensitivity = 0.002;
+
+            const rotY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -movementX * sensitivity);
+            const rotX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -movementY * sensitivity);
+
+            camera.quaternion.multiplyQuaternions(rotY, camera.quaternion);
+            camera.quaternion.multiplyQuaternions(camera.quaternion, rotX);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // --- ACTIONS ---
+        function fireSphere(chargeTime, firedSphereData) {
+            const maxCharge = 3;
+            const chargeRatio = Math.min(chargeTime, maxCharge) / maxCharge;
+            
+            const minMass = 5, maxMass = 2000;
+            const mass = minMass + (maxMass - minMass) * chargeRatio;
+            
+            const minSpeed = 1;
+            const velocityMagnitude = minSpeed + (projectileBaseSpeed - minSpeed) * (1 - chargeRatio);
+            
+            const velocity = lockedFireDirection.clone().multiplyScalar(velocityMagnitude).add(cameraPhysics.velocity);
+            const position = firedSphereData.mesh.position;
+            
+            const newSphere = createSphere(mass, position, velocity, shootingColor);
+
+            for (let i = spheres.length - 2; i >= 0; i--) { 
+                const otherSphere = spheres[i];
+                if (newSphere.mesh.position.distanceTo(otherSphere.mesh.position) < otherSphere.radius) {
+                    scene.remove(newSphere.mesh);
+                    newSphere.mesh.geometry.dispose();
+                    newSphere.mesh.material.dispose();
+
+                    scene.remove(otherSphere.mesh);
+                    otherSphere.mesh.geometry.dispose();
+                    otherSphere.mesh.material.dispose();
+                    if(otherSphere.light) scene.remove(otherSphere.light);
+                    
+                    spheres = spheres.filter(s => s !== newSphere && s !== otherSphere);
+                    break;
+                }
+            }
+            
+            lockedFireDirection = null;
+        }
+
+        function focusOnLargestMass() {
+            if (spheres.length === 0) return;
+            const largest = spheres.reduce((prev, current) => (prev.mass > current.mass) ? prev : current);
+            camera.lookAt(largest.mesh.position);
+        }
+        
+        function updateCameraMovement() {
+            if (isPaused) return;
+            const thrustForce = 0.05;
+            cameraPhysics.thrust.set(0, 0, 0);
+
+            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+            const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+
+            if (keys['w']) cameraPhysics.thrust.add(forward);
+            if (keys['s']) cameraPhysics.thrust.sub(forward);
+            if (keys['a']) cameraPhysics.thrust.sub(right);
+            if (keys['d']) cameraPhysics.thrust.add(right);
+            if (keys[' ']) cameraPhysics.thrust.add(up);
+            if (keys['shift']) cameraPhysics.thrust.sub(up);
+
+            if (cameraPhysics.thrust.lengthSq() > 0) {
+                cameraPhysics.thrust.normalize().multiplyScalar(thrustForce);
+                cameraPhysics.velocity.add(cameraPhysics.thrust);
+            }
+        }
+        
+        function updateCameraRoll() {
+            if (isPaused) return;
+            const rollSpeed = 0.02;
+            if (keys['z']) camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), rollSpeed));
+            if (keys['c']) camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), -rollSpeed));
+        }
+        
+        function updateChargeIndicator() {
+            if(eChargeStartTime > 0 && chargingSphere) {
+                 const chargeTime = (Date.now() - eChargeStartTime) / 1000;
+                 const maxCharge = 3;
+                 const chargeRatio = Math.min(chargeTime, maxCharge) / maxCharge;
+                 document.getElementById('charge-bar').style.width = `${chargeRatio * 100}%`;
+                 
+                 const minMass = 5, maxMass = 2000;
+                 const mass = minMass + (maxMass - minMass) * chargeRatio;
+                 const radius = Math.cbrt(mass);
+                 chargingSphere.mesh.scale.setScalar(radius / chargingSphere.radius);
+                 
+                 const direction = lockedFireDirection || new THREE.Vector3(0,0,-1);
+                 chargingSphere.mesh.position.copy(camera.position).add(direction.clone().multiplyScalar(radius + 5));
+            }
+        }
+
+        // --- SIMULATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            if (isPaused) {
+                renderer.render(scene, camera);
+                return;
+            }
+
+            updateCameraMovement();
+            updateChargeIndicator();
+            updateCameraRoll();
+
+            // Physics calculations
+            let totalGravForceOnCamera = new THREE.Vector3();
+            for (let i = 0; i < spheres.length; i++) {
+                const sphereA = spheres[i];
+                const distVecCamera = sphereA.mesh.position.clone().sub(camera.position);
+                const distCameraSq = distVecCamera.lengthSq();
+                if (distCameraSq > sphereA.radius * sphereA.radius) { 
+                    const forceDirCamera = distVecCamera.normalize();
+                    const forceMagCamera = (GRAV_CONSTANT * sphereA.mass * cameraPhysics.mass) / distCameraSq;
+                    totalGravForceOnCamera.add(forceDirCamera.multiplyScalar(forceMagCamera));
+                }
+                for (let j = i + 1; j < spheres.length; j++) {
+                    const sphereB = spheres[j];
+                    const distVec = sphereB.mesh.position.clone().sub(sphereA.mesh.position);
+                    const distSq = distVec.lengthSq();
+                    if (distSq > 0) {
+                        const forceDir = distVec.normalize();
+                        const forceMag = (GRAV_CONSTANT * sphereA.mass * sphereB.mass) / distSq;
+                        const forceVec = forceDir.multiplyScalar(forceMag);
+                        sphereA.velocity.add(forceVec.clone().divideScalar(sphereA.mass));
+                        sphereB.velocity.sub(forceVec.clone().divideScalar(sphereB.mass));
+                    }
+                }
+            }
+            
+            cameraPhysics.velocity.add(totalGravForceOnCamera);
+            camera.position.add(cameraPhysics.velocity);
+            
+            spheres.forEach(s => {
+                s.mesh.position.add(s.velocity);
+                if (s.light) {
+                    s.light.position.copy(s.mesh.position);
+                }
+            });
+
+            // Collision detection
+            let mergedIndices = new Set();
+            let newSpheresData = [];
+            for (let i = 0; i < spheres.length; i++) {
+                if (mergedIndices.has(i)) continue;
+                for (let j = i + 1; j < spheres.length; j++) {
+                    if (mergedIndices.has(j)) continue;
+                    const sphereA = spheres[i];
+                    const sphereB = spheres[j];
+                    if (sphereA.mesh.position.distanceTo(sphereB.mesh.position) < sphereA.radius + sphereB.radius) {
+                        const combinedMass = sphereA.mass + sphereB.mass;
+                        const newRadius = Math.cbrt(combinedMass);
+                        const momentumA = sphereA.velocity.clone().multiplyScalar(sphereA.mass);
+                        const momentumB = sphereB.velocity.clone().multiplyScalar(sphereB.mass);
+                        const newVelocity = momentumA.add(momentumB).divideScalar(combinedMass);
+                        const newColor = sphereA.mesh.material.color.clone().lerp(sphereB.mesh.material.color, sphereB.mass / combinedMass);
+                        const newPosition = sphereA.mesh.position.clone().lerp(sphereB.mesh.position, sphereB.mass / combinedMass);
+                        const newType = (sphereA.type === 'natural' || sphereB.type === 'natural') ? 'natural' : 'projectile';
+                        newSpheresData.push({ mass: combinedMass, position: newPosition, velocity: newVelocity, color: newColor, type: newType });
+                        mergedIndices.add(i);
+                        mergedIndices.add(j);
+                        break; 
+                    }
+                }
+            }
+            
+            if (mergedIndices.size > 0) {
+                const remainingSpheres = spheres.filter((_, index) => !mergedIndices.has(index));
+                spheres.forEach((sphere, index) => {
+                    if (mergedIndices.has(index)) {
+                        scene.remove(sphere.mesh);
+                        sphere.mesh.geometry.dispose();
+                        sphere.mesh.material.dispose();
+                        if(sphere.light) scene.remove(sphere.light);
+                    }
+                });
+                spheres = remainingSpheres;
+                newSpheresData.forEach(data => createSphere(data.mass, data.position, data.velocity, data.color, data.type));
+            }
+
+            // Boundary checks
+            let insideSphere = null;
+            spheres = spheres.filter(sphere => {
+                const distFromCamera = sphere.mesh.position.distanceTo(camera.position);
+                if (distFromCamera > BOUNDARY_RADIUS) {
+                    scene.remove(sphere.mesh);
+                    sphere.mesh.geometry.dispose();
+                    sphere.mesh.material.dispose();
+                    if(sphere.light) scene.remove(sphere.light);
+                    return false;
+                }
+                if(distFromCamera < sphere.radius) {
+                    insideSphere = sphere;
+                }
+                return true;
+            });
+            
+            scene.background = insideSphere ? insideSphere.mesh.material.color : new THREE.Color(0x000000);
+            renderer.render(scene, camera);
+        }
+
+        // --- START ---
+        initScene();
+        setupMenu();
+        escapeMenu.style.display = 'flex'; // Start with menu open
+        animate();
+    </script>
+</body>
+</html>

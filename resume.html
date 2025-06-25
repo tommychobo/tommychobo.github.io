@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Résumé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <!-- Chosen Palette: Cyber Noir -->
+    <!-- Application Structure Plan: A document viewer page. The structure is a simple vertical layout containing a title and a container element. JavaScript is used to dynamically render each page of a specified PDF file into this container as a separate canvas, creating a seamless, scrollable document experience without nested scrollbars. This is designed to be extensible for multiple documents in the future. -->
+    <!-- Visualization & Content Choices: Content: PDF Document -> Goal: Display a professional document -> Presentation: Render each PDF page to an HTML <canvas> element. -> Interaction: Standard browser scrolling. -> Justification: This method provides a high-fidelity rendering of the original document while integrating it smoothly into the webpage's flow, avoiding the clunky UI of default browser PDF viewers and meeting the user's "no internal scrollbar" requirement. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+        .section-bg {
+            background-color: #1F2937; /* Dark Gray / Gray-800 */
+        }
+        #pdf-render-container canvas {
+            display: block;
+            margin: 0 auto 1rem auto; /* Center canvas and add space below */
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation (Placeholder for Google Sites) -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                 <!-- IMPORTANT: You should add this "Résumé" link to your other HTML files too! -->
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="resume.html" class="text-accent mx-3 font-bold">R&eacute;sum&eacute;</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+                
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-header mb-12">My R&eacute;sum&eacute;</h1>
+            </div>
+
+            <!-- This is where the PDF will be rendered -->
+            <div id="pdf-container" class="section-bg p-4 md:p-8 rounded-lg shadow-lg">
+                <div id="loader" class="text-center text-gray-400">Loading document...</div>
+                <div id="pdf-render-container"></div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- CONFIGURATION ---
+            // IMPORTANT: Replace this with the path to your actual PDF file.
+            const pdfUrl = 'project_docs/resume0625_embedded2.pdf'; // Resume document URL
+
+            const container = document.getElementById('pdf-render-container');
+            const loader = document.getElementById('loader');
+            
+            // Set the worker source for PDF.js
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
+
+            async function renderPDF(url) {
+                try {
+                    const pdf = await pdfjsLib.getDocument(url).promise;
+                    loader.style.display = 'none'; // Hide loader once PDF is fetched
+
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        const page = await pdf.getPage(pageNum);
+                        
+                        const scale = 1.5; // You can adjust this scale
+                        const viewport = page.getViewport({ scale: scale });
+
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+
+                        await page.render(renderContext).promise;
+                        container.appendChild(canvas);
+                    }
+                } catch (error) {
+                    loader.textContent = 'Error: Could not load PDF.';
+                    console.error('Error rendering PDF:', error);
+                }
+            }
+
+            renderPDF(pdfUrl);
+        });
+    </script>
+
+</body>
+</html>

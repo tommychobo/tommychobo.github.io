@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cyber Noir -->
+    <!-- Application Structure Plan: A thematic, three-column layout for the main service categories, allowing users to quickly self-segment. Below this, each category expands into a detailed section with bulleted lists of specific offerings. This two-level hierarchy (broad categories -> specific services) organizes a large amount of information efficiently, guiding the user from general interest to specific needs. -->
+    <!-- Visualization & Content Choices: Content: Service Offerings -> Goal: Clearly present a wide variety of services -> Presentation: A grid of three main categories, followed by detailed vertical sections. Uses headers, paragraphs, and lists to structure text. -> Interaction: Each service area has a clear call-to-action button ("Request a Quote," "Book a Session") that will eventually link to a contact page. -> Justification: This structure avoids a single, overwhelming list. It breaks complex information into manageable, themed chunks, improving readability and user navigation. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+        .section-bg {
+            background-color: #1F2937; /* Dark Gray / Gray-800 */
+        }
+        .btn-action {
+            background-color: #4A5C50; /* Murky Green */
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .list-bullet::before {
+            content: '»';
+            color: #22D3EE; /* Bright Cyan */
+            margin-right: 0.75rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation (Placeholder for Google Sites) -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                <!-- In Google Sites, you will build the navigation menu (Home, Projects, Music, etc.) using their UI. -->
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="resume.html" class="text-gray-300 hover:text-accent mx-3">R&eacute;sum&eacute;</a>
+                <a href="#" class="text-accent mx-3 font-bold">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-header mb-2">Services</h1>
+                <p class="text-lg text-gray-400 mb-12">A multi-disciplinary suite of technical, creative, and educational offerings.</p>
+            </div>
+
+            <div class="space-y-16">
+
+                <!-- Section 1: Technology & Development -->
+                <section id="tech-services" class="section-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <h2 class="text-3xl md:text-4xl font-bold text-header mb-6 border-b-2 border-cyan-500 pb-2">Technology & Development</h2>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Custom Software -->
+                        <div>
+                            <h3 class="text-xl font-bold text-accent mb-2">Custom Software Development</h3>
+                            <p class="text-gray-300 mb-3">From websites to complex applications, I build solutions tailored to your needs.</p>
+                            <ul class="space-y-2">
+                                <li class="list-bullet">Full-stack Web Development</li>
+                                <li class="list-bullet">AI/ML Pipelines (e.g., scoring for dancers)</li>
+                                <li class="list-bullet">GPU Shader Programming & 3D Graphics (Unity)</li>
+                                <li class="list-bullet">Bespoke Desktop & Web Programs</li>
+                            </ul>
+                        </div>
+                        <!-- Hardware & Electronics -->
+                        <div>
+                            <h3 class="text-xl font-bold text-accent mb-2">Hardware & Electronics</h3>
+                            <p class="text-gray-300 mb-3">Expert-level fabrication, repair, and design of electronic devices.</p>
+                            <ul class="space-y-2">
+                                <li class="list-bullet">Soldering & Repair (vintage tech included)</li>
+                                <li class="list-bullet">Custom Microcontroller Devices (Arduino, etc.)</li>
+                                <li class="list-bullet">Bespoke Musical Instruments (accelerometer-based)</li>
+                                <li class="list-bullet">CNC Machines & MIDI Footswitches</li>
+                                <li class="list-bullet">Custom Guitar Effects Pedals</li>
+                            </ul>
+                        </div>
+                        <!-- AI & IoT Consulting -->
+                        <div>
+                            <h3 class="text-xl font-bold text-accent mb-2">AI & IoT Integration Consulting</h3>
+                            <p class="text-gray-300 mb-3">Navigate the modern tech landscape safely and effectively.</p>
+                            <ul class="space-y-2">
+                                <li class="list-bullet">Home & Workplace Automation Strategy</li>
+                                <li class="list-bullet">Using AI Tools for Optimization</li>
+                                <li class="list-bullet">Security & Safety with Smart Devices</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="text-center mt-8">
+                        <a href="contact.html" class="btn-action font-semibold py-2 px-5 rounded-lg text-lg">Request Tech Quote</a>
+                    </div>
+                    <div class="text-center mt-8">
+                        <a href="projects.html" class="btn-action font-semibold py-2 px-5 rounded-lg text-lg">Past Projects</a>
+                    </div>
+                </section>
+
+                <!-- Section 2: Music & Audio -->
+                <section id="music-services" class="section-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <h2 class="text-3xl md:text-4xl font-bold text-header mb-6 border-b-2 border-cyan-500 pb-2">Music & Audio</h2>
+                     <div class="grid md:grid-cols-2 gap-8">
+                         <!-- Production -->
+                         <div>
+                            <h3 class="text-xl font-bold text-accent mb-2">Professional Production</h3>
+                            <p class="text-gray-300 mb-3">Full-service audio production to bring your sound to life.</p>
+                            <ul class="space-y-2">
+                                <li class="list-bullet">Session Recording (Guitar, Bass, Drums, Vocals)</li>
+                                <li class="list-bullet">Mixing Services for all Genres</li>
+                                <li class="list-bullet">Professional Audio Mastering</li>
+                            </ul>
+                        </div>
+                        <!-- Consultation & Performance -->
+                        <div>
+                            <h3 class="text-xl font-bold text-accent mb-2">Consultation & Performance</h3>
+                            <p class="text-gray-300 mb-3">Leverage 8+ years of industry and performance experience.</p>
+                            <ul class="space-y-2">
+                                <li class="list-bullet">Band Consultation (dynamics, industry nav)</li>
+                                <li class="list-bullet">Live Performance Setup & Strategy</li>
+                                <li class="list-bullet">Jazz, Rock, Concert Band Experience</li>
+                            </ul>
+                        </div>
+                     </div>
+                     <div class="text-center mt-8">
+                        <a href="contact.html" class="btn-action font-semibold py-2 px-5 rounded-lg text-lg">Book a Music Session</a>
+                    </div>
+                    <div class="text-center mt-8">
+                        <a href="music.html" class="btn-action font-semibold py-2 px-5 rounded-lg text-lg">Listen to my Catalog</a>
+                    </div>
+                </section>
+
+                <!-- Section 3: Tutoring & Education -->
+                 <section id="tutoring-services" class="section-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <h2 class="text-3xl md:text-4xl font-bold text-header mb-6 border-b-2 border-cyan-500 pb-2">Tutoring & Education</h2>
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Academic Tutoring -->
+                        <div>
+                            <h3 class="text-xl font-bold text-accent mb-2">Academic & Technical Tutoring</h3>
+                            <p class="text-gray-300 mb-3">Personalized lessons from high school to advanced college levels.</p>
+                            <ul class="space-y-2">
+                                <li class="list-bullet">Advanced Math (up to Z-Transforms, ODEs)</li>
+                                <li class="list-bullet">Python, C, C++, Java, JavaScript</li>
+                                <li class="list-bullet">C# and Unity Game Development</li>
+                            </ul>
+                        </div>
+                        <!-- Music Lessons -->
+                        <div>
+                            <h3 class="text-xl font-bold text-accent mb-2">Music Lessons</h3>
+                            <p class="text-gray-300 mb-3">Practical and theoretical music education for all levels.</p>
+                            <ul class="space-y-2">
+                                <li class="list-bullet">Instrument Lessons (Guitar, Piano, Drums, Bass)</li>
+                                <li class="list-bullet">Advanced Music Theory</li>
+                                <li class="list-bullet">Electronic Music Production</li>
+                            </ul>
+                        </div>
+                     </div>
+                     <div class="text-center mt-8">
+                        <a href="contact.html" class="btn-action font-semibold py-2 px-5 rounded-lg text-lg">Schedule a Lesson</a>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
+

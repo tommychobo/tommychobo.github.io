@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Music</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cyber Noir -->
+    <!-- Application Structure Plan: A single-page vertical playlist. The primary user flow is top-to-bottom exploration of the music catalog. Each list item is a self-contained interactive module with album art, track info, and playback controls. This focused, linear structure is ideal for presenting a list of media, ensuring the user's attention is on listening and browsing the tracks without distraction. -->
+    <!-- Visualization & Content Choices: Content: Track List -> Goal: Present and play audio files -> Presentation: Vertical list of interactive rows -> Interaction: Each row has a play/pause button, and a real-time updating time display. The background of each row is themed to its album art. -> Justification: This provides a rich, visually connected browsing experience. The player controls are intuitive and standard. Using a single audio element controlled by JS is efficient. The time display provides necessary user feedback. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+        .track-row:hover .play-button {
+            background-color: #DC143C; /* Crimson */
+        }
+        .play-button {
+            background-color: #4A5C50; /* Murky Green */
+            transition: background-color 0.3s;
+        }
+        .progress-bar-bg {
+            background-color: #4B5563; /* Gray-600 */
+        }
+        .progress-bar-fg {
+            background-color: #22D3EE; /* Bright Cyan */
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Audio Element - Hidden, controlled by JS -->
+    <audio id="audio-player"></audio>
+
+    <!-- Navigation (Placeholder for Google Sites) -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                 <!-- In Google Sites, you will build the navigation menu (Home, Projects, Music, etc.) using their UI. -->
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="resume.html" class="text-gray-300 hover:text-accent mx-3">R&eacute;sum&eacute;</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="#" class="text-accent mx-3 font-bold">Music</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+     <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-header mb-2">Music Catalog</h1>
+            <p class="text-lg text-gray-400 mb-10">
+                I don't know why I have this drive to make and share music,
+                but it is powerful, and I know it can be done right. I want to share my music with you, not just as a collection of songs, but as a part of my story
+                and an evolution of my skill.
+                <br><br>
+                My music is free to listen to, download, and share. I hope you find something in it that resonates with you.
+                <br><br>
+                ONE IN THE WAVE Coming Soon
+                <br><br>
+            </p>
+
+            <!-- Playlist will be rendered here by JavaScript -->
+            <div id="playlist-container" class="space-y-4">
+                <!-- JS will populate this -->
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DATA ---
+            // Replace these with your actual track information.
+            const tracks = [
+                {
+                    id: 'track1',
+                    title: 'The Factory',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/factory.mp3',
+                    imageSrc: 'https://placehold.co/100x100/DC140A/FFFFFF?text=F(t)',
+                    bgColor: 'rgba(220, 20, 10, 0.1)' 
+                },
+                {
+                    id: 'track2',
+                    title: 'Eternal Computer',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/eternal_computer.mp3', 
+                    imageSrc: 'pictures/eternal_computer.webp',
+                    bgColor: 'rgba(77, 153, 0, 0.1)' 
+                },
+                {
+                    id: 'track3',
+                    title: 'Vitals',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/vitals.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/DC143C/FFFFFF?text=_/\\__',
+                    bgColor: 'rgba(220, 20, 60, 0.1)' // Crimson, with opacity
+                },
+                {
+                    id: 'track4',
+                    title: 'Focus',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/focus.mp3', 
+                    imageSrc: 'pictures/focus_cover.png',
+                    bgColor: 'rgba(191, 64, 191, 0.2)'
+                },
+                {
+                    id: 'track5',
+                    title: 'I Wish I',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/i_wish_i.mp3', 
+                    imageSrc: 'https://placehold.co/100x100/22D3EE/111827?text=iWi',
+                    bgColor: 'rgba(34, 211, 238, 0.1)' 
+                },
+                {
+                    id: 'track6',
+                    title: 'Nothing Yet - Tommy\'s Version',
+                    artist: 'Boycott Daylight',
+                    audioSrc: 'my_music/nothing_yet_tommy.mp3', 
+                    imageSrc: 'https://placehold.co/100x100/DC143C/FFFFFF?text=0',
+                    bgColor: 'rgba(220, 20, 60, 0.1)' // Crimson, with opacity
+                },
+                {
+                    id: 'track7',
+                    title: 'Red \& Blue',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/red_blue.mp3', // Placeholder MP3
+                    imageSrc: 'pictures/red_blue_cover.png',
+                    bgColor: 'rgba(74, 92, 80, 0.2)' // Murky Green, with opacity
+                },
+                {
+                    id: 'track8',
+                    title: 'Little Devil',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/little_devil.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/DC143C/FFFFFF?text=DEVIL',
+                    bgColor: 'rgba(220, 20, 60, 0.1)' // Crimson, with opacity
+                },
+                {
+                    id: 'track9',
+                    title: 'Bluebird',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/bluebird.mp3', 
+                    imageSrc: 'https://placehold.co/100x100/22D3EE/111827?text=Bird',
+                    bgColor: 'rgba(34, 211, 238, 0.1)'
+                },
+                {
+                    id: 'track10',
+                    title: 'Spirits',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/spirits.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/22D3EE/111827?text=SPI',
+                    bgColor: 'rgba(34, 211, 238, 0.1)' // Bright Cyan, with opacity
+                },
+                {
+                    id: 'track11',
+                    title: 'Finish Line',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/finish_line.mp3', 
+                    imageSrc: 'https://placehold.co/100x100/00CC99/111827?text=FIN',
+                    bgColor: 'rgba(0, 204, 153, 0.1)' // Bright Cyan, with opacity
+                },
+                {
+                    id: 'track12',
+                    title: 'What Do You Know About Destiny',
+                    artist: 'Liam Shutt x Tommy Choboter',
+                    audioSrc: 'my_music/destiny_liam.mp3', 
+                    imageSrc: 'pictures/destiny_liam_cover.png',
+                    bgColor: 'rgba(255, 51, 204, 0.1)' 
+                },
+                {
+                    id: 'track13',
+                    title: 'Summertime',
+                    artist: 'Liam Shutt x Tommy Choboter',
+                    audioSrc: 'my_music/summertime_liam.mp3', // Placeholder MP3
+                    imageSrc: 'pictures/summertime_liam_cover.png',
+                    bgColor: 'rgba(74, 92, 80, 0.2)' // Murky Green, with opacity
+                },
+                {
+                    id: 'track14',
+                    title: 'My Rooom',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/my_room.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/4A5C50/FFFFFF?text=ROOM',
+                    bgColor: 'rgba(74, 92, 80, 0.2)' // Murky Green, with opacity
+                },
+                {
+                    id: 'track15',
+                    title: 'This Weekend',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/this_weekend.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/DC143C/FFFFFF?text=WEEK',
+                    bgColor: 'rgba(220, 20, 60, 0.1)' // Crimson, with opacity
+                },
+                {
+                    id: 'track16',
+                    title: 'IDK',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/idk2.mp3', 
+                    imageSrc: 'https://placehold.co/100x100/4A8C50/FFFFFF?text=idk',
+                    bgColor: 'rgba(74, 140, 80, 0.2)' 
+                },
+                {
+                    id: 'track17',
+                    title: 'Triangle Trip',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/trippyprog.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/4A5C50/FFFFFF?text=TRIP',
+                    bgColor: 'rgba(74, 92, 80, 0.2)' // Murky Green, with opacity
+                },
+                {
+                    id: 'track18',
+                    title: 'Want',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/want.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/22D3EE/111827?text=WANT',
+                    bgColor: 'rgba(34, 211, 238, 0.1)' // Bright Cyan, with opacity
+                },
+                {
+                    id: 'track19',
+                    title: 'Welcome to Life',
+                    artist: 'Tommy Choboter',
+                    audioSrc: 'my_music/welcome.mp3', // Placeholder MP3
+                    imageSrc: 'https://placehold.co/100x100/4A5C50/FFFFFF?text=LIFE',
+                    bgColor: 'rgba(74, 92, 80, 0.2)' // Murky Green, with opacity
+                }
+            ];
+
+            const audioPlayer = document.getElementById('audio-player');
+            const playlistContainer = document.getElementById('playlist-container');
+            let currentTrackId = null;
+            let trackDurations = {};
+
+            // --- RENDER PLAYLIST ---
+            function renderPlaylist() {
+                let content = '';
+                tracks.forEach(track => {
+                    content += `
+                        <div id="${track.id}" class="track-row flex items-center gap-4 p-4 rounded-lg transition-all duration-300" style="background-color: ${track.bgColor};">
+                            <img src="${track.imageSrc}" alt="Album art for ${track.title}" class="w-16 h-16 md:w-20 md:h-20 rounded-md shadow-md" onerror="this.onerror=null; this.src='https://placehold.co/100x100/374151/FFFFFF?text=ART';">
+                            <div class="flex-grow">
+                                <h3 class="text-xl font-bold text-header">${track.title}</h3>
+                                <p class="text-gray-400">${track.artist}</p>
+                                <div class="w-full progress-bar-bg rounded-full h-1.5 mt-2 overflow-hidden">
+                                  <div id="buffer-${track.id}" class="buffer-bar" style="width: 0%;"></div>
+                                  <div id="progress-${track.id}" class="progress-bar-fg h-full rounded-full" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                            <button data-track-id="${track.id}" class="play-button flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-full text-white text-2xl flex items-center justify-center shadow-lg">
+                                <span id="icon-${track.id}">▶</span>
+                            </button>
+                            <div class="w-24 text-center text-gray-400 font-mono">
+                                <span id="time-${track.id}">00:00 / --:--</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                playlistContainer.innerHTML = content;
+            }
+
+            // --- EVENT LISTENERS ---
+            playlistContainer.addEventListener('click', function(e) {
+                if (e.target && e.target.closest('.play-button')) {
+                    const button = e.target.closest('.play-button');
+                    const trackId = button.dataset.trackId;
+                    handlePlayPause(trackId);
+                }
+            });
+
+            audioPlayer.addEventListener('timeupdate', updateProgress);
+            audioPlayer.addEventListener('progress', updateBuffer); // New event listener
+            audioPlayer.addEventListener('loadedmetadata', updateDurationDisplay);
+            audioPlayer.addEventListener('ended', handleTrackEnd);
+
+            // --- PLAYER LOGIC ---
+            function handlePlayPause(trackId) {
+                const track = tracks.find(t => t.id === trackId);
+                if (!track) return;
+
+                if (currentTrackId === trackId && !audioPlayer.paused) {
+                    audioPlayer.pause();
+                    updatePlayIcon(trackId, false);
+                } else {
+                    if (currentTrackId && currentTrackId !== trackId) {
+                        resetTrackUI(currentTrackId);
+                    }
+                    currentTrackId = trackId;
+                    if(audioPlayer.src !== track.audioSrc) {
+                        audioPlayer.src = track.audioSrc;
+                    }
+                    audioPlayer.play().then(() => {
+                        updatePlayIcon(trackId, true);
+                    }).catch(err => console.error("Playback error:", err));
+                }
+            }
+            
+            function updateProgress() {
+                if (!currentTrackId || !audioPlayer.duration) return;
+                const { currentTime, duration } = audioPlayer;
+                const progressPercent = (currentTime / duration) * 100;
+                
+                const progressBar = document.getElementById(`progress-${currentTrackId}`);
+                if (progressBar) progressBar.style.width = `${progressPercent}%`;
+
+                const timeDisplay = document.getElementById(`time-${currentTrackId}`);
+                if (timeDisplay) timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+            }
+
+            // New function to update the buffer bar
+            function updateBuffer() {
+                if (!currentTrackId || !audioPlayer.duration) return;
+                
+                const bufferBar = document.getElementById(`buffer-${currentTrackId}`);
+                if (audioPlayer.buffered.length > 0) {
+                    const bufferedAmount = audioPlayer.buffered.end(audioPlayer.buffered.length - 1);
+                    const bufferPercent = (bufferedAmount / audioPlayer.duration) * 100;
+                    if(bufferBar) bufferBar.style.width = `${bufferPercent}%`;
+                }
+            }
+
+            function updateDurationDisplay() {
+                if (!currentTrackId) return;
+                const duration = audioPlayer.duration;
+                trackDurations[currentTrackId] = duration;
+                updateProgress();
+            }
+            
+            function handleTrackEnd() {
+                if (currentTrackId) {
+                    resetTrackUI(currentTrackId);
+                    currentTrackId = null;
+                }
+            }
+
+            function updatePlayIcon(trackId, isPlaying) {
+                tracks.forEach(t => {
+                    if (t.id !== trackId) {
+                        const iconEl = document.getElementById(`icon-${t.id}`);
+                        if (iconEl) iconEl.textContent = '▶';
+                    }
+                });
+                const iconEl = document.getElementById(`icon-${trackId}`);
+                if (iconEl) iconEl.textContent = isPlaying ? '❚❚' : '▶';
+            }
+            
+            function resetTrackUI(trackId) {
+                const iconEl = document.getElementById(`icon-${trackId}`);
+                if (iconEl) iconEl.textContent = '▶';
+
+                const progressBar = document.getElementById(`progress-${trackId}`);
+                if (progressBar) progressBar.style.width = '0%';
+
+                const bufferBar = document.getElementById(`buffer-${trackId}`);
+                if(bufferBar) bufferBar.style.width = '0%';
+
+                const timeDisplay = document.getElementById(`time-${trackId}`);
+                const duration = trackDurations[trackId];
+                if (timeDisplay && duration) {
+                    timeDisplay.textContent = `00:00 / ${formatTime(duration)}`;
+                } else if (timeDisplay) {
+                    timeDisplay.textContent = `00:00 / --:--`;
+                }
+            }
+
+            // --- HELPER ---
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return '--:--';
+                const minutes = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // --- INITIALIZE ---
+            renderPlaylist();
+        });
+    </script>
+</body>
+</html>

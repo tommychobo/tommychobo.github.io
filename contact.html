@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Contact</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cyber Noir -->
+    <!-- Application Structure Plan: A two-part contact page. The first part offers immediate connection via social media icons for users who prefer that. The second part provides a traditional contact form for direct, private inquiries. This structure caters to different user preferences for communication. -->
+    <!-- Visualization & Content Choices: Content: Social Links & Contact Form -> Goal: Enable users to connect -> Presentation: A grid of large social media icons and a standard, clean form. -> Interaction: Icons link to profiles, and the form has a clear submit button. -> Justification: This is a standard and highly effective layout for a contact page. It's universally understood and provides multiple contact avenues without clutter. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+        .form-bg {
+            background-color: #1F2937; /* Dark Gray / Gray-800 */
+        }
+        .btn-action {
+            background-color: #4A5C50; /* Murky Green */
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .form-input {
+            background-color: #374151; /* Gray-700 */
+            border: 1px solid #4B5563; /* Gray-600 */
+            color: #F9FAFB;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #22D3EE; /* Bright Cyan */
+        }
+        .social-icon {
+            background-color: #374151;
+            color: #D1D5DB;
+            transition: all 0.3s;
+        }
+        .social-icon:hover {
+            background-color: #DC143C;
+            color: #FFFFFF;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation (Placeholder for Google Sites) -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                 <!-- In Google Sites, you will build the navigation menu using their UI. -->
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="resume.html" class="text-gray-300 hover:text-accent mx-3">R&eacute;sum&eacute;</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="#" class="text-accent mx-3 font-bold">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-header mb-2">Get In Touch</h1>
+                <p class="text-lg text-gray-400 mb-12">Have a project in mind, a question, or just want to connect? Here's how.</p>
+            </div>
+
+            <!-- Social Links Section -->
+            <section id="socials" class="mb-16">
+                <h2 class="text-2xl font-bold text-header text-center mb-6">Find Me on the Web</h2>
+                <div class="flex justify-center gap-4 md:gap-6">
+                    <!-- Replace "#" with your actual profile links -->
+                    <a href="https://github.com/tommychobo" class="social-icon w-16 h-16 rounded-full flex items-center justify-center" aria-label="GitHub">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.03-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/thomas-choboter-b23b6b1b6/" class="social-icon w-16 h-16 rounded-full flex items-center justify-center" aria-label="LinkedIn">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </a>
+                    <!-- YouTube Icon Link (Arrow Centered) -->
+                    <a href="https://www.youtube.com/@tommychobo3537" class="social-icon w-16 h-16 rounded-full flex items-center justify-center" aria-label="YouTube">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.75 15 L 15.94 12 L 10.75 9 Z M22,12c0,2.19-0.16,3.8-0.44,4.83c-0.25,0.9-0.83,1.48-1.73,1.73c-0.47,0.13-1.1,0.22-1.9,0.28 c-0.8,0.07-1.49,0.1-2.09,0.1L15,19c-2.19,0-3.8-0.16-4.83-0.44c-0.9-0.25-1.48-0.83-1.73-1.73 c-0.13-0.47-0.22-1.1-0.28-1.9c-0.07-0.8-0.1-1.49-0.1-2.09L8,12c0-2.19,0.16-3.8,0.44-4.83c0.25-0.9,0.83-1.48,1.73-1.73 c0.47-0.13,1.1-0.22,1.9-0.28c0.8-0.07,1.49-0.1,2.09-0.1L15,5c2.19,0,3.8,0.16,4.83,0.44c0.9,0.25,1.48,0.83,1.73,1.73 C21.84,8.2,22,9.81,22,12Z"/></svg>
+                    </a>
+
+                    <!-- Instagram Icon Link -->
+                    <a href="https://www.instagram.com/tommychobo/" class="social-icon w-16 h-16 rounded-full flex items-center justify-center" aria-label="Instagram">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" /></svg>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Contact Form Section -->
+            <section id="contact-form" class="form-bg p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold text-header text-center mb-6">Send a Direct Message</h2>
+                <!-- To make this form work, replace "YOUR_FORMSPREE_ENDPOINT" with your actual Formspree URL -->
+                <form action="https://formspree.io/f/xeokpqeo" method="POST">
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-bold text-gray-300 mb-2">Your Name</label>
+                                <input type="text" id="name" name="name" class="form-input w-full p-3 rounded-md" required>
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-bold text-gray-300 mb-2">Your Email</label>
+                                <input type="email" id="email" name="email" class="form-input w-full p-3 rounded-md" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="subject" class="block text-sm font-bold text-gray-300 mb-2">Subject</label>
+                            <input type="text" id="subject" name="subject" class="form-input w-full p-3 rounded-md" required>
+                        </div>
+                        <div>
+                             <label for="message" class="block text-sm font-bold text-gray-300 mb-2">Message</label>
+                             <textarea id="message" name="message" rows="5" class="form-input w-full p-3 rounded-md" required></textarea>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8">
+                        <button type="submit" class="btn-action font-semibold py-3 px-8 rounded-lg text-lg">Send Message</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

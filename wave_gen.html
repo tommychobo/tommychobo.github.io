@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-Tone Waveform Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827;
+            color: #D1D5DB;
+        }
+        .text-accent { color: #22D3EE; }
+        .bg-control-panel { background-color: #1F2937; }
+        .bg-oscillator { background-color: #374151; position: relative; } /* Added relative positioning */
+        .glowing-red {
+            stroke: #FF0000;
+            filter: drop-shadow(0 0 3px #FF0000) drop-shadow(0 0 8px #FF0000);
+        }
+        .btn-action {
+            background-color: #4A5C50;
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover { background-color: #DC143C; }
+        
+        .btn-multiplier {
+            background-color: #4B5563;
+            color: #E5E7EB;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .btn-multiplier:hover {
+            background-color: #DC143C;
+        }
+
+        .btn-utility {
+            background-color: #4B5563;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+        }
+        .btn-utility:hover {
+            background-color: #22D3EE;
+            color: #111827;
+        }
+
+        /* Custom Slider Styles */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #4B5563;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            border-radius: 2px;
+        }
+        input[type="range"]:hover { opacity: 1; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #22D3EE;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #22D3EE;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="antialiased p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Waveform Display -->
+        <div class="bg-control-panel p-4 rounded-t-lg">
+            <canvas id="waveform-canvas" class="w-full h-48 md:h-64"></canvas>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-control-panel p-4 md:p-6 rounded-b-lg shadow-lg">
+            <!-- Oscillator Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Oscillator 1 (template) -->
+                <div class="bg-oscillator p-4 rounded-lg" id="osc1-controls">
+                    <h3 class="text-xl font-bold text-accent mb-3">Oscillator 1</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="flex justify-between text-sm"><span>Frequency</span><span class="value">1000 Hz</span></label>
+                            <input type="range" class="w-full freq-slider" min="0" max="1" step="0.0001">
+                        </div>
+                        <div>
+                            <label class="flex justify-between text-sm"><span>Amplitude</span><span class="value">0.50</span></label>
+                            <input type="range" class="w-full amp-slider" min="0" max="1" step="0.01">
+                        </div>
+                        <div>
+                            <label class="flex justify-between text-sm"><span>Phase</span><span class="value">0 &deg;</span></label>
+                            <input type="range" class="w-full phase-slider" min="0" max="360" step="1">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1 mt-4 multiplier-buttons">
+                        <button data-multiplier="2" class="btn-multiplier">x2</button>
+                        <button data-multiplier="3" class="btn-multiplier">x3</button>
+                        <button data-multiplier="5" class="btn-multiplier">x5</button>
+                        <button data-multiplier="7" class="btn-multiplier">x7</button>
+                        <button data-multiplier="0.5" class="btn-multiplier">/2</button>
+                        <button data-multiplier="0.333333" class="btn-multiplier">/3</button>
+                        <button data-multiplier="0.2" class="btn-multiplier">/5</button>
+                        <button data-multiplier="0.142857" class="btn-multiplier">/7</button>
+                    </div>
+                </div>
+                <!-- Other oscillators will be cloned by JS -->
+            </div>
+
+            <!-- Master Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center pt-4 border-t border-gray-700">
+                <div class="flex gap-2">
+                     <button id="master-mute-btn" class="w-1/2 btn-action font-semibold py-2 px-4 rounded-lg">Mute</button>
+                     <button id="harmonic-align-btn" class="w-1/2 btn-action font-semibold py-2 px-4 rounded-lg">Align</button>
+                </div>
+                <div class="md:col-span-2">
+                     <label class="flex justify-between text-sm"><span>Master Volume</span><span id="master-vol-value" class="value">0.50</span></label>
+                    <input id="master-volume" type="range" class="w-full" min="0" max="1" step="0.01" value="0.5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- SETUP ---
+        const canvas = document.getElementById('waveform-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const masterGain = audioCtx.createGain();
+        masterGain.connect(audioCtx.destination);
+        masterGain.gain.value = 0.5;
+
+        const oscillators = [];
+        const numOscillators = 4;
+        
+        const minFreq = 20;
+        const maxFreq = 3000; // Lowered max frequency
+
+        let isMuted = false;
+        let lastKnownVolume = 0.5;
+
+        // --- DYNAMICALLY CREATE OSCILLATOR CONTROLS ---
+        function createOscillatorControls() {
+            const container = document.querySelector('.grid.gap-4');
+            const template = document.getElementById('osc1-controls');
+            for (let i = 2; i <= numOscillators; i++) {
+                const clone = template.cloneNode(true);
+                clone.id = `osc${i}-controls`;
+                clone.querySelector('h3').textContent = `Oscillator ${i}`;
+                
+                const matchButton = document.createElement('button');
+                matchButton.textContent = 'Match O1';
+                matchButton.className = 'btn-action btn-utility absolute top-3 right-3 rounded';
+                clone.querySelector('h3').insertAdjacentElement('afterend', matchButton);
+                
+                container.appendChild(clone);
+            }
+        }
+        createOscillatorControls();
+
+        // --- WEB AUDIO & CONTROLS INITIALIZATION ---
+        const controlElements = document.querySelectorAll('.bg-oscillator');
+        controlElements.forEach((panel, i) => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            gainNode.connect(masterGain);
+            oscillator.connect(gainNode);
+
+            const freqSlider = panel.querySelector('.freq-slider');
+            const ampSlider = panel.querySelector('.amp-slider');
+            const phaseSlider = panel.querySelector('.phase-slider');
+
+            const freqValueLabel = freqSlider.previousElementSibling.querySelector('.value');
+            const ampValueLabel = ampSlider.previousElementSibling.querySelector('.value');
+            const phaseValueLabel = phaseSlider.previousElementSibling.querySelector('.value');
+            
+            const state = {
+                osc: oscillator,
+                gain: gainNode,
+                freqSlider, ampSlider, phaseSlider,
+                freqValueLabel, ampValueLabel, phaseValueLabel,
+                phase: 0
+            };
+
+            const initialFreqLog = (Math.log(440) - Math.log(minFreq)) / (Math.log(maxFreq) - Math.log(minFreq)); // Start at 440Hz
+            freqSlider.value = i === 0 ? initialFreqLog : Math.random();
+            ampSlider.value = i === 0 ? 0.5 : 0;
+            phaseSlider.value = 0;
+
+            function updateFrequency() {
+                const logValue = parseFloat(freqSlider.value);
+                const freq = minFreq * Math.pow(maxFreq / minFreq, logValue);
+                state.osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                freqValueLabel.textContent = `${Math.round(freq)} Hz`;
+            }
+
+            function updateAmplitude() {
+                const amp = parseFloat(ampSlider.value);
+                state.gain.gain.setValueAtTime(amp, audioCtx.currentTime);
+                ampValueLabel.textContent = amp.toFixed(2);
+            }
+            
+            function updatePhase() {
+                state.phase = (parseFloat(phaseSlider.value) * Math.PI) / 180;
+                phaseValueLabel.textContent = `${phaseSlider.value} \xB0`;
+            }
+
+            freqSlider.addEventListener('input', updateFrequency);
+            ampSlider.addEventListener('input', updateAmplitude);
+            phaseSlider.addEventListener('input', updatePhase);
+            
+            const multiplierButtons = panel.querySelector('.multiplier-buttons');
+            multiplierButtons.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const multiplier = parseFloat(e.target.dataset.multiplier);
+                    let currentFreq = state.osc.frequency.value;
+                    let newFreq = currentFreq * multiplier;
+                    newFreq = Math.max(minFreq, Math.min(maxFreq, newFreq));
+                    state.osc.frequency.setValueAtTime(newFreq, audioCtx.currentTime);
+                    const newLogValue = (Math.log(newFreq) - Math.log(minFreq)) / (Math.log(maxFreq) - Math.log(minFreq));
+                    state.freqSlider.value = newLogValue;
+                    state.freqValueLabel.textContent = `${Math.round(newFreq)} Hz`;
+                }
+            });
+
+            const matchBtn = panel.querySelector('.btn-utility');
+            if (matchBtn) {
+                 matchBtn.addEventListener('click', () => {
+                    const sourceState = oscillators[0];
+                    const targetState = oscillators[i];
+
+                    targetState.freqSlider.value = sourceState.freqSlider.value;
+                    targetState.ampSlider.value = sourceState.ampSlider.value;
+                    targetState.phaseSlider.value = sourceState.phaseSlider.value;
+
+                    targetState.freqSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                    targetState.ampSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                    targetState.phaseSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+            }
+
+            updateFrequency();
+            updateAmplitude();
+            updatePhase();
+
+            oscillator.start();
+            oscillators.push(state);
+        });
+
+        const masterVolumeSlider = document.getElementById('master-volume');
+        const masterVolValue = document.getElementById('master-vol-value');
+        const muteBtn = document.getElementById('master-mute-btn');
+
+        masterVolumeSlider.addEventListener('input', () => {
+            const newVolume = parseFloat(masterVolumeSlider.value);
+            masterVolValue.textContent = newVolume.toFixed(2);
+            masterGain.gain.setValueAtTime(newVolume, audioCtx.currentTime);
+            lastKnownVolume = newVolume;
+
+            if (isMuted && newVolume > 0) {
+                isMuted = false;
+                muteBtn.textContent = 'Mute';
+                muteBtn.classList.remove('bg-red-600');
+            }
+        });
+        
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                lastKnownVolume = masterGain.gain.value;
+                masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01);
+                muteBtn.textContent = 'Unmute';
+                muteBtn.classList.add('bg-red-600');
+            } else {
+                masterGain.gain.setTargetAtTime(lastKnownVolume, audioCtx.currentTime, 0.01);
+                muteBtn.textContent = 'Mute';
+                muteBtn.classList.remove('bg-red-600');
+            }
+        });
+
+        document.getElementById('harmonic-align-btn').addEventListener('click', () => {
+            const baseFreq = oscillators[0].osc.frequency.value;
+            for (let i = 1; i < oscillators.length; i++) {
+                const currentFreq = oscillators[i].osc.frequency.value;
+                const ratio = currentFreq / baseFreq;
+                const nearestMultiple = Math.round(ratio);
+                const newFreq = baseFreq * (nearestMultiple > 0 ? nearestMultiple : 1);
+                const newLogValue = (Math.log(newFreq) - Math.log(minFreq)) / (Math.log(maxFreq) - Math.log(minFreq));
+                oscillators[i].freqSlider.value = newLogValue;
+                oscillators[i].osc.frequency.setValueAtTime(newFreq, audioCtx.currentTime);
+                oscillators[i].freqValueLabel.textContent = `${Math.round(newFreq)} Hz`;
+            }
+        });
+
+        // --- VISUALIZATION ---
+        function drawWaveform() {
+            requestAnimationFrame(drawWaveform);
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#FF0000';
+            ctx.shadowColor = '#FF0000';
+            ctx.shadowBlur = 10;
+            
+            const timePeriod = (1 / 20) * 3;
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerY = height / 2;
+
+            for (let x = 0; x < width; x++) {
+                const t = (x / width) * timePeriod;
+                let y = 0;
+                for (const osc of oscillators) {
+                    const freq = osc.osc.frequency.value;
+                    const amp = osc.gain.gain.value;
+                    const phase = osc.phase;
+                    y += amp * Math.sin(2 * Math.PI * freq * t + phase);
+                }
+                const plotY = centerY - (y * masterGain.gain.value * (height / 2.5));
+
+                if (x === 0) {
+                    ctx.moveTo(x, plotY);
+                } else {
+                    ctx.lineTo(x, plotY);
+                }
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0; 
+        }
+
+        drawWaveform();
+    });
+    </script>
+</body>
+</html>
