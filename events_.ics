@@ -1,0 +1,57 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Thomas Choboter//Website Events//EN
+
+BEGIN:VEVENT
+UID:20250630T190000Z@tommychobo.github.io
+DTSTAMP:20250629T000000Z
+DTSTART:20250630T190000Z
+DTEND:20250630T220000Z
+COLOR:#FF0045
+SUMMARY:Live Performance @ The Cyber-Cafe
+LOCATION:Online Stream
+DESCRIPTION:Join me for a live set featuring original electronic music and live-coded visuals.
+URL;VALUE=URI:https://www.twitch.tv/
+END:VEVENT
+
+BEGIN:VEVENT
+UID:20250701T000000Z@tommychobo.github.io
+DTSTAMP:20250629T000000Z
+DTSTART;VALUE=DATE:20250701
+SUMMARY:Project Deadline: Phasor Gate Sim v2
+DESCRIPTION:Releasing the next major version of the orbital mechanics simulator! Check it out on the projects page.
+URL;VALUE=URI:projects.html
+END:VEVENT
+
+BEGIN:VEVENT
+COLOR:#009945
+UID:20250703T180000Z@tommychobo.github.io
+DTSTAMP:20250629T000000Z
+DTSTART:20250703T180000Z
+DTEND:20250703T200000Z
+SUMMARY:Synth Workshop on YouTube
+DESCRIPTION:A deep dive into subtractive synthesis and sound design.
+URL;VALUE=URI:https://www.youtube.com/
+COLOR:#DC143C
+END:VEVENT
+
+BEGIN:VEVENT
+UID:20250705T000000Z@tommychobo.github.io
+DTSTAMP:20250629T000000Z
+DTSTART;VALUE=DATE:20250705
+SUMMARY:Day Off / Jam Session
+DESCRIPTION:Taking a day to relax and work on new material.
+END:VEVENT
+
+BEGIN:VEVENT
+UID:bandpractice2025@tommychobo.github.io
+DTSTAMP:20250629T000000Z
+DTSTART;TZID=America/Los_Angeles:20250621T190000
+DTEND;TZID=America/Los_Angeles:20250621T210000
+SUMMARY:Band Practice
+LOCATION:The Studio
+RRULE:FREQ=WEEKLY;UNTIL=20250730T235959Z;BYDAY=TU,TH
+COLOR:#3B82F6
+END:VEVENT
+
+END:VCALENDAR

@@ -6,8 +6,12 @@
     <title>Thomas Choboter - Events</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- FullCalendar JS -->
+    <!-- FullCalendar JS Core -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <!-- ICAL.js (Dependency for the iCalendar plugin) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ical.js/1.4.0/ical.min.js"></script>
+    <!-- FullCalendar iCalendar Plugin -->
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/icalendar@6.1.11/index.global.min.js'></script>
     <!-- Chosen Palette: Cyber Noir -->
     <!-- Application Structure Plan: A dedicated page for events featuring a full-screen, interactive calendar. The layout prioritizes the calendar itself, with a simple header. The calendar is configured to be navigable (month/week/day views, next/prev buttons) and will display events loaded from a local data source. -->
     <!-- Visualization & Content Choices: Content: Event Schedule -> Goal: Display upcoming events -> Presentation: Interactive Calendar Grid -> Interaction: View switching, navigation through time, clicking on events for details (future enhancement). -> Justification: A full calendar is the most intuitive and universally understood way to present date-based information, far superior to a simple list. -->
@@ -59,11 +63,32 @@
              color: #E5E7EB;
         }
         .fc-event {
-            background-color: #4B5563 !important;
-            border-color: #4B5563 !important;
+            cursor: pointer;
+            background-color: #4B5563; /* Default color */
+            border-color: #4B5563; /* Default border */
         }
         .fc-event-title {
             font-weight: bold;
+        }
+        
+        /* New Tooltip Styles */
+        #tooltip {
+            position: absolute;
+            z-index: 100;
+            background-color: #111827;
+            border: 1px solid #22D3EE;
+            border-radius: 5px;
+            padding: 10px;
+            max-width: 300px;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+            pointer-events: none; /* Allows mouse to pass through to calendar */
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        #tooltip.visible {
+            display: block;
+            opacity: 1;
         }
     </style>
 </head>
@@ -79,7 +104,7 @@
                 <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
                 <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
                 <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
-                <a href="#" class="text-accent mx-3 font-bold">Events</a>
+                <a href="events.html" class="text-accent mx-3 font-bold">Events</a>
                 <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
             </div>
         </nav>
@@ -95,11 +120,20 @@
             
             <div id='calendar' class="p-4 md:p-6 section-bg rounded-lg shadow-lg"></div>
 
-            <!-- TODO: Blog Section -->
-            
-
+            <!-- Blog Section -->
+            <section id="blog" class="mt-20">
+                <div class="text-center mb-12">
+                     <h2 class="text-3xl md:text-4xl font-bold text-header">Event Highlights & News</h2>
+                </div>
+                <div class="max-w-4xl mx-auto space-y-12" id="blog-posts-container">
+                    <!-- Placeholder for future blog posts -->
+                </div>
+            </section>
         </div>
     </main>
+    
+    <!-- Tooltip Element -->
+    <div id="tooltip"></div>
     
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12 mt-16">
@@ -111,44 +145,77 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const calendarEl = document.getElementById('calendar');
+        const tooltip = document.getElementById('tooltip');
         
-        // This is where you would load your calendar data.
-        // For now, it's populated with placeholder events.
-        // You can generate this array from an .ics file using an online converter.
-        const eventsData = [
-          {
-            title: 'Live Performance @ The Frog & Fiddle',
-            start: '2025-07-18T20:00:00',
-            end: '2025-07-18T23:00:00',
-            color: '#DC143C' // Crimson
-          },
-          {
-            title: 'Synth Workshop',
-            start: '2025-07-22',
-            allDay: true
-          },
-          {
-            title: 'Project Deadline: "Aurora"',
-            start: '2025-08-01'
-          },
-          {
-            title: 'Jazz Combo @ Linnaea\'s Cafe',
-            start: '2025-08-09T19:00:00',
-            color: '#22D3EE' // Cyan
-          }
-        ];
-
         const calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
+          initialView: 'timeGridWeek',
           headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           },
-          events: eventsData,
-          editable: false, // Set to true if you want to allow dragging events
+          events: {
+            url: 'events.ics',
+            format: 'ics'
+          },
+          // This function now handles coloring *after* the event is rendered
+          eventDidMount: function(info) {
+             if (info.event.extendedProps && info.event.extendedProps.raw && Array.isArray(info.event.extendedProps.raw.props)) {
+              const colorProp = info.event.extendedProps.raw.props.find(p => p.name === 'COLOR');
+              if (colorProp && colorProp.value) {
+                info.el.style.backgroundColor = colorProp.value;
+                info.el.style.borderColor = colorProp.value;
+              }
+            }
+          },
+          // Show tooltip on hover
+          eventMouseEnter: function(info) {
+            let content = `<strong>${info.event.title}</strong>`;
+            
+            const startDate = info.event.start;
+            const endDate = info.event.end;
+            if(startDate){
+                let timeString = '';
+                if(info.event.allDay) {
+                    timeString = 'All Day';
+                } else {
+                    timeString = startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    if(endDate) {
+                        timeString += ` - ${endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                    }
+                }
+                content += `<br><small>${timeString}</small>`;
+            }
+
+            if(info.event.extendedProps.location) {
+                content += `<br><em>${info.event.extendedProps.location}</em>`;
+            }
+            if(info.event.extendedProps.description) {
+                content += `<hr class="my-1 border-gray-600"><p>${info.event.extendedProps.description}</p>`;
+            }
+
+            tooltip.innerHTML = content;
+            tooltip.classList.add('visible');
+
+            // Position tooltip
+            const x = info.jsEvent.pageX + 10;
+            const y = info.jsEvent.pageY + 10;
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+          },
+          // Hide tooltip on mouse leave
+          eventMouseLeave: function(info) {
+            tooltip.classList.remove('visible');
+          },
+          eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            if (info.event.url) {
+              window.open(info.event.url, "_blank");
+            }
+          },
+          editable: false,
           selectable: true,
-          dayMaxEvents: true, // allow "more" link when too many events
+          dayMaxEvents: true, 
         });
 
         calendar.render();

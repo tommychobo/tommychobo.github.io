@@ -1,0 +1,42 @@
+Understanding the .ics File Format
+
+The .ics format is a universal standard for calendar data. At its core, it's just a plain text file with a specific structure. Here’s a breakdown of the key components used in the example file:
+
+    BEGIN:VCALENDAR...END:VCALENDAR: This wraps the entire file.
+
+    BEGIN:VEVENT...END:VEVENT: This block defines a single event. You can have as many of these as you want.
+
+    UID: A Unique ID for the event. It can be anything, but using the date and your domain is a common practice.
+
+    DTSTAMP: A timestamp of when the event was created.
+
+    DTSTART / DTEND: The start and end times for the event. Note the format: YYYYMMDDTHHMMSSZ. The Z stands for "Zulu" time, or UTC. For all-day events, you use DTSTART;VALUE=DATE:YYYYMMDD and omit the end time.
+
+    SUMMARY: This is the title of your event that gets displayed on the calendar.
+
+    DESCRIPTION: A longer description. While FullCalendar doesn't show this by default, other calendar apps (like Google Calendar or Outlook) will. You can also configure FullCalendar to show it in a popup.
+
+    LOCATION: The physical or virtual location of the event.
+
+    URL: This is the magic property for making events clickable. The eventClick function in the new events.html looks for this property and opens the link in a new tab.
+
+Can you customize colors with the .ics file?
+
+Yes, you can! I've included an example of this in the "Synth Workshop" event:
+
+COLOR:#DC143C
+
+This COLOR property is a non-standard but widely supported extension that the FullCalendar iCalendar plugin understands perfectly. You can add this line to any VEVENT and set the hex code to match the colors from your website's theme.
+What else can .ics files do?
+
+They are very flexible! Here are a few other powerful features you could use in the future:
+
+    Recurring Events (RRULE): You can define complex rules for events that repeat daily, weekly, monthly, or on specific days (e.g., "the last Friday of every month"). This is perfect for a regular weekly stream or class.
+
+    Reminders/Alarms (VALARM): You can embed alarms within an event, so when someone imports your .ics file into their own calendar app, they can get notifications before the event starts.
+
+    Attendees (ATTENDEE): You can list attendees for an event, including their RSVP status, which is useful for collaborative planning.
+
+    Timezones (TZID): For events that aren't in UTC, you can specify a timezone to ensure the time is displayed correctly for everyone, everywhere.
+
+To get started, simply save the .ics content above into a file, place it in your website's folder, and push the changes to GitHub. Your calendar will automatically update!
