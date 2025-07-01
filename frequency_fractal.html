@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinusoidal Superposition Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
+        }
+        /* Custom slider styles */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #374151; /* gray-700 */
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #60a5fa; /* blue-400 */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #1f2937; /* gray-800 */
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #60a5fa; /* blue-400 */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #1f2937; /* gray-800 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-5xl bg-gray-800 rounded-2xl shadow-2xl p-6 space-y-6">
+        
+        <!-- Header -->
+        <header class="text-center border-b border-gray-700 pb-4">
+            <h1 class="text-2xl font-bold text-white">Sinusoidal Superposition Explorer</h1>
+            <p class="text-sm text-gray-400">Control octave harmonics with a dual logarithmic Gaussian filter</p>
+        </header>
+
+        <!-- Visualization -->
+        <div class="space-y-2">
+            <div id="freq-visualization" class="relative w-full h-16 bg-gray-900/50 rounded-lg">
+                <div class="absolute top-1/2 left-0 w-full h-px bg-gray-600"></div>
+            </div>
+            <canvas id="waveform-canvas" class="w-full h-48 bg-gray-900/50 rounded-lg"></canvas>
+        </div>
+
+        <!-- Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+            
+            <!-- Audio Controls -->
+            <div class="bg-gray-700/50 p-4 rounded-lg space-y-4">
+                <div class="flex items-center justify-between">
+                    <button id="mute-button" class="w-24 text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold transition-colors">
+                        Unmute
+                    </button>
+                    <div class="flex items-center space-x-2 w-full ml-4">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Octave Controls -->
+            <div class="bg-gray-700/50 p-4 rounded-lg space-y-3">
+                <label for="octave-freq-slider" class="flex justify-between items-center font-medium">
+                    <span>Octave Base Frequency</span>
+                    <span id="octave-freq-label" class="text-blue-400 font-mono">220 Hz</span>
+                </label>
+                <input id="octave-freq-slider" type="range" min="20" max="2000" step="1" value="220">
+            </div>
+
+            <!-- Gaussian Controls -->
+            <div class="bg-gray-700/50 p-4 rounded-lg space-y-3">
+                <label for="gaussian-freq-slider" class="flex justify-between items-center font-medium">
+                    <span>Gaussian Center Frequency</span>
+                    <span id="gaussian-freq-label" class="text-green-400 font-mono">880 Hz</span>
+                </label>
+                <input id="gaussian-freq-slider" type="range" min="20" max="20000" step="1" value="880">
+                
+                <label for="gaussian-q-slider" class="flex justify-between items-center font-medium">
+                    <span>Gaussian Spread (Q)</span>
+                    <span id="gaussian-q-label" class="text-purple-400 font-mono">1.0</span>
+                </label>
+                <input id="gaussian-q-slider" type="range" min="0.1" max="2" step="0.01" value="1">
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM ELEMENTS ---
+            const muteButton = document.getElementById('mute-button');
+            const volumeSlider = document.getElementById('volume-slider');
+            const octaveFreqSlider = document.getElementById('octave-freq-slider');
+            const octaveFreqLabel = document.getElementById('octave-freq-label');
+            const gaussianFreqSlider = document.getElementById('gaussian-freq-slider');
+            const gaussianFreqLabel = document.getElementById('gaussian-freq-label');
+            const gaussianQSlider = document.getElementById('gaussian-q-slider');
+            const gaussianQLabel = document.getElementById('gaussian-q-label');
+            const freqVisContainer = document.getElementById('freq-visualization');
+            const waveformCanvas = document.getElementById('waveform-canvas');
+            const canvasCtx = waveformCanvas.getContext('2d');
+
+            // --- CONSTANTS ---
+            const MIN_FREQ = 20;
+            const MAX_FREQ = 20000;
+            const NUM_OCTAVES = 8;
+            const RAMP_TIME = 0.05;
+
+            // --- AUDIO SETUP ---
+            let isMuted = true;
+            let audioInitialized = false;
+            let oscillatorPool = [];
+            let masterGain;
+
+            // --- STATE ---
+            let state = {
+                octaveBaseFreq: 220,
+                gaussianCenterFreq: 880,
+                gaussianQ: 1.0,
+                volume: 0.5,
+                activeSines: [],
+                totalGain: 0,
+            };
+
+            // --- HELPER FUNCTIONS ---
+            const freqToLogPos = (freq) => {
+                if (freq <= 0) return 0;
+                const logMin = Math.log2(MIN_FREQ);
+                const logMax = Math.log2(MAX_FREQ);
+                return (Math.log2(freq) - logMin) / (logMax - logMin);
+            };
+            
+            const sliderToLogFreq = (value, minVal, maxVal, minFreq, maxFreq) => {
+                const range = maxVal - minVal;
+                const pos = (value - minVal) / range;
+                return minFreq * Math.pow(maxFreq / minFreq, pos);
+            };
+            
+            // MODIFICATION: Encapsulated Gaussian calculation
+            const calculateGaussianGain = (freq, centerFreq, sigma) => {
+                const logFreq = Math.log2(freq);
+                const logCenter = Math.log2(centerFreq);
+                const distance = logFreq - logCenter;
+                return Math.exp(-(distance * distance) / (2 * sigma * sigma));
+            };
+
+            // --- INITIALIZATION ---
+            function initializeAudio() {
+                if (audioInitialized) return;
+                Tone.start();
+                masterGain = new Tone.Gain(state.volume).toDestination();
+                
+                for (let i = -NUM_OCTAVES; i <= NUM_OCTAVES; i++) {
+                    const gainNode = new Tone.Gain(0).connect(masterGain);
+                    const osc = new Tone.Oscillator(0, 'sine').connect(gainNode);
+                    osc.start();
+                    oscillatorPool.push({ osc, gainNode });
+                }
+
+                audioInitialized = true;
+                muteButton.textContent = 'Mute';
+                console.log('Audio context started and oscillator pool created.');
+                updateAudio();
+            }
+
+            // --- CORE LOGIC ---
+            function updateAudio() {
+                if (!audioInitialized) return;
+
+                const { octaveBaseFreq, gaussianCenterFreq, gaussianQ } = state;
+                // MODIFICATION: Define second Gaussian center
+                const gaussianCenterFreq2 = gaussianCenterFreq * 2;
+                const sigma = 1 / gaussianQ;
+
+                let activeSines = [];
+                let totalGain = 0;
+
+                oscillatorPool.forEach((poolItem, index) => {
+                    const octaveIndex = index - NUM_OCTAVES;
+                    const freq = octaveBaseFreq * Math.pow(2, octaveIndex);
+
+                    if (freq < MIN_FREQ || freq > MAX_FREQ) {
+                        poolItem.gainNode.gain.rampTo(0, RAMP_TIME);
+                        return;
+                    }
+
+                    poolItem.osc.frequency.rampTo(freq, RAMP_TIME);
+
+                    // MODIFICATION: Calculate gain from both Gaussians
+                    const gain1 = calculateGaussianGain(freq, gaussianCenterFreq, sigma);
+                    const gain2 = calculateGaussianGain(freq, gaussianCenterFreq2, sigma);
+                    
+                    // Add gains together and clamp at 1.0 to prevent clipping
+                    const finalGain = Math.min(1.0, gain1 + gain2);
+                    
+                    poolItem.gainNode.gain.rampTo(finalGain, RAMP_TIME);
+
+                    if (finalGain > 0.001) {
+                        activeSines.push({ freq, gain: finalGain });
+                        totalGain += finalGain;
+                    }
+                });
+                
+                state.activeSines = activeSines;
+                state.totalGain = totalGain;
+            }
+            
+            // --- VISUALIZATION ---
+            function updateFreqVisualization() {
+                freqVisContainer.innerHTML = '<div class="absolute top-1/2 left-0 w-full h-px bg-gray-600"></div>';
+                const containerWidth = freqVisContainer.clientWidth;
+                
+                const { octaveBaseFreq, gaussianCenterFreq, gaussianQ } = state;
+                const gaussianCenterFreq2 = gaussianCenterFreq * 2; // Second Gaussian center
+
+                // Draw Octave dots
+                for (let i = -NUM_OCTAVES; i <= NUM_OCTAVES; i++) {
+                    const freq = octaveBaseFreq * Math.pow(2, i);
+                     if (freq < MIN_FREQ || freq > MAX_FREQ) continue;
+                    const xPos = freqToLogPos(freq) * containerWidth;
+                    const dot = document.createElement('div');
+                    dot.className = 'absolute w-2 h-2 bg-blue-400 rounded-full -translate-x-1/2 -translate-y-1/2';
+                    dot.style.left = `${xPos}px`;
+                    dot.title = `Octave: ${freq.toFixed(1)} Hz`;
+                    freqVisContainer.appendChild(dot);
+                }
+                
+                const sigma = 1 / gaussianQ;
+
+                // MODIFICATION: Function to draw a Gaussian's indicators
+                const drawGaussianIndicators = (centerFreq, color) => {
+                    // Draw Center dot
+                    if (centerFreq <= MAX_FREQ) {
+                        const centerX = freqToLogPos(centerFreq) * containerWidth;
+                        const centerDot = document.createElement('div');
+                        centerDot.className = `absolute w-3 h-3 ${color} rounded-full -translate-x-1/2 -translate-y-1/2 border-2 border-gray-900`;
+                        centerDot.style.left = `${centerX}px`;
+                        centerDot.title = `Gaussian Center: ${centerFreq.toFixed(1)} Hz`;
+                        freqVisContainer.appendChild(centerDot);
+                    }
+
+                    // Draw Spread indicators
+                    const freqPlusSigma = Math.pow(2, Math.log2(centerFreq) + sigma);
+                    const freqMinusSigma = Math.pow(2, Math.log2(centerFreq) - sigma);
+
+                    [freqPlusSigma, freqMinusSigma].forEach(f => {
+                        if (f >= MIN_FREQ && f <= MAX_FREQ) {
+                            const x = freqToLogPos(f) * containerWidth;
+                            const spreadDot = document.createElement('div');
+                            spreadDot.className = 'absolute w-2 h-2 bg-purple-400/70 rounded-full -translate-x-1/2 -translate-y-1/2';
+                            spreadDot.style.left = `${x}px`;
+                            spreadDot.title = `Spread (1 sigma): ${f.toFixed(1)} Hz`;
+                            freqVisContainer.appendChild(spreadDot);
+                        }
+                    });
+                };
+
+                drawGaussianIndicators(gaussianCenterFreq, 'bg-green-400');
+                drawGaussianIndicators(gaussianCenterFreq2, 'bg-teal-400'); // Use teal for the second Gaussian
+            }
+
+            function drawWaveform() {
+                requestAnimationFrame(drawWaveform);
+                
+                waveformCanvas.width = waveformCanvas.clientWidth;
+                waveformCanvas.height = waveformCanvas.clientHeight;
+                canvasCtx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+
+                if (!audioInitialized || isMuted || state.activeSines.length === 0) {
+                    return;
+                }
+
+                canvasCtx.beginPath();
+                canvasCtx.strokeStyle = '#93c5fd';
+                canvasCtx.lineWidth = 2;
+
+                const displayTimeWindow = 0.02;
+                const twoPi = 2 * Math.PI;
+
+                for (let x = 0; x < waveformCanvas.width; x++) {
+                    const t = (x / waveformCanvas.width) * displayTimeWindow;
+                    let y = 0;
+
+                    for (const sine of state.activeSines) {
+                        y += sine.gain * Math.sin(twoPi * sine.freq * t);
+                    }
+                    
+                    const normalizedY = y / (state.totalGain || 1);
+                    const displayAmplitude = state.volume * 0.8;
+                    const yPos = (waveformCanvas.height / 2) * (1 - normalizedY * displayAmplitude);
+
+                    if (x === 0) {
+                        canvasCtx.moveTo(x, yPos);
+                    } else {
+                        canvasCtx.lineTo(x, yPos);
+                    }
+                }
+                canvasCtx.stroke();
+            }
+
+            // --- EVENT LISTENERS ---
+            muteButton.addEventListener('click', () => {
+                if (!audioInitialized) {
+                    initializeAudio();
+                }
+                isMuted = !isMuted;
+                if (isMuted) {
+                    masterGain.gain.rampTo(0, RAMP_TIME);
+                    muteButton.textContent = 'Unmute';
+                    muteButton.classList.replace('bg-red-600', 'bg-blue-600');
+                    muteButton.classList.replace('hover:bg-red-700', 'hover:bg-blue-700');
+                } else {
+                    masterGain.gain.rampTo(state.volume, RAMP_TIME);
+                    muteButton.textContent = 'Mute';
+                    muteButton.classList.replace('bg-blue-600', 'bg-red-600');
+                    muteButton.classList.replace('hover:bg-blue-700', 'hover:bg-red-700');
+                }
+            });
+
+            volumeSlider.addEventListener('input', (e) => {
+                state.volume = parseFloat(e.target.value);
+                if (audioInitialized && !isMuted) {
+                    masterGain.gain.rampTo(state.volume, RAMP_TIME);
+                }
+            });
+
+            function onParamChange() {
+                updateAudio();
+                updateFreqVisualization();
+            }
+
+            octaveFreqSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                state.octaveBaseFreq = sliderToLogFreq(val, 20, 2000, 20, 2000);
+                octaveFreqLabel.textContent = `${state.octaveBaseFreq.toFixed(1)} Hz`;
+                onParamChange();
+            });
+            
+            gaussianFreqSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                state.gaussianCenterFreq = sliderToLogFreq(val, 20, 20000, 20, 20000);
+                gaussianFreqLabel.textContent = `${state.gaussianCenterFreq.toFixed(1)} Hz`;
+                onParamChange();
+            });
+            
+            gaussianQSlider.addEventListener('input', (e) => {
+                state.gaussianQ = parseFloat(e.target.value);
+                gaussianQLabel.textContent = state.gaussianQ.toFixed(2);
+                onParamChange();
+            });
+
+            new ResizeObserver(() => {
+                updateFreqVisualization();
+                waveformCanvas.width = waveformCanvas.clientWidth;
+                waveformCanvas.height = waveformCanvas.clientHeight;
+            }).observe(freqVisContainer);
+
+            // --- INITIAL DRAW ---
+            octaveFreqSlider.value = 220;
+            gaussianFreqSlider.value = 880;
+            gaussianQSlider.value = 1.0;
+            volumeSlider.value = 0.5;
+
+            octaveFreqSlider.dispatchEvent(new Event('input'));
+            gaussianFreqSlider.dispatchEvent(new Event('input'));
+            gaussianQSlider.dispatchEvent(new Event('input'));
+
+            updateFreqVisualization();
+            drawWaveform();
+        });
+    </script>
+</body>
+</html>

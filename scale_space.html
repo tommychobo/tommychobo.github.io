@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scale Space Explorer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    canvas {
+      margin-top: 30px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .controls {
+      margin-bottom: 20px;
+    }
+    input[type="text"], input[type="range"] {
+      width: 100%;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      margin: 4px;
+      padding: 8px 12px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Scale Space Explorer</h1>
+    <div class="controls">
+      <label for="macroSelect">Saved Macros:</label>
+      <select id="macroSelect" onchange="loadMacro(this.value)"></select>
+      <label for="macroName">Macro name:</label>
+      <input type="text" id="macroName" placeholder="Enter macro name (e.g. sawtooth)" />
+      <label for="funcInput">Function (sinusoidal sum):</label>
+      <input type="text" id="funcInput" value="1*sin(2*x)" />
+      <button onclick="plotEverything();">Render</button>
+      <button onclick="tryAddMacro();">Save Macro</button>
+      
+      <div style="margin-top: 10px;">
+        <label for="scaleBounds">a(s) Plot Bounds</label>
+        
+        <div>
+          x min: <input type="number" id="xmin" value="-1.0" step="0.1" style="width:80px;">
+          x max: <input type="number" id="xmax" value="1.6" step="0.1" style="width:80px;">
+          y min: <input type="number" id="ymin" value="-2.0" step="0.1" style="width:80px;">
+          y max: <input type="number" id="ymax" value="2.0" step="0.1" style="width:80px;">
+        </div>
+        <label for="scaleCenter">Scale center point (x₀):</label>
+        <input type="range" id="scaleCenter" min="-6.28" max="6.28" step="0.01" value="0" oninput="document.getElementById('centerLabel').innerText = this.value">
+        <span id="centerLabel">0</span>
+      </div>
+    </div>
+    
+    <canvas id="waveformCanvas" width="800" height="200"></canvas>
+    <canvas id="scalingCanvas" width="800" height="300"></canvas>
+    <canvas id="errorCanvas" width="800" height="300"></canvas>
+  </div>
+
+  <script>
+    // Moved macro management script block into proper inline script
+    function tryAddMacro() {
+      const name = document.getElementById('macroName').value.trim();
+      const expr = document.getElementById('funcInput').value;
+      if (!name) return;
+
+      let macros = JSON.parse(localStorage.getItem('userMacros') || '{}');
+      macros[name] = expr;
+      localStorage.setItem('userMacros', JSON.stringify(macros));
+
+      updateMacroSelect();
+      document.getElementById('macroName').value = '';
+    }
+
+    function updateMacroSelect() {
+      const macroSelect = document.getElementById('macroSelect');
+      macroSelect.innerHTML = '';
+
+      const builtIns = {
+        'Square Wave': '1*sin(x)+1/3*sin(3*x)+1/5*sin(5*x)+1/7*sin(7*x)',
+        'Noise': Array.from({length: 20}, (_, i) => {
+          const a = (Math.random() * 2 - 1).toFixed(2);
+          const w = (i + 1).toFixed(2);
+          const b = (Math.random() * 6.28).toFixed(2);
+          return `${a}*sin(${w}*x+${b})`;
+        }).join('+'),
+        'Chirp': '1*sin(x*x)'
+      };
+
+      for (const [label, expr] of Object.entries(builtIns)) {
+        const opt = document.createElement('option');
+        opt.value = expr;
+        opt.textContent = label;
+        macroSelect.appendChild(opt);
+      }
+
+      const macros = JSON.parse(localStorage.getItem('userMacros') || '{}');
+      for (const name in macros) {
+        const opt = document.createElement('option');
+        opt.value = macros[name];
+        opt.textContent = name;
+        macroSelect.appendChild(opt);
+      }
+    }
+
+    function loadMacro(expr) {
+      if (!expr) return;
+      document.getElementById('funcInput').value = expr;
+      plotEverything();
+    }
+    let waveformChart = null;
+    let scalingChart = null;
+
+    function applyMacro(type) {
+      const input = document.getElementById('funcInput');
+      if (type === 'square') {
+        input.value = '1*sin(x)+1/3*sin(3*x)+1/5*sin(5*x)+1/7*sin(7*x)';
+      } else if (type === 'noise') {
+        input.value = Array.from({length: 20}, (_, i) => {
+          const a = (Math.random() * 2 - 1).toFixed(2);
+          const w = (i + 1).toFixed(2);
+          const b = (Math.random() * 6.28).toFixed(2);
+          return `${a}*sin(${w}*x+${b})`;
+        }).join('+');
+      } else if (type === 'chirp') {
+        input.value = '1*sin(x*x)';
+      }
+      plotEverything();
+    }
+
+    function parseFunction(expr) {
+      try {
+        const safeExpr = expr
+          .replace(/(?<!\.)\bsin\b/g, 'Math.sin')
+          .replace(/(?<!\.)\bcos\b/g, 'Math.cos')
+          .replace(/(?<!\.)\btan\b/g, 'Math.tan')
+          .replace(/(?<!\.)\bexp\b/g, 'Math.exp')
+          .replace(/(?<!\.)\blog\b/g, 'Math.log')
+          .replace(/(?<!\.)\bsqrt\b/g, 'Math.sqrt')
+          .replace(/(?<!\.)\babs\b/g, 'Math.abs');
+        return new Function("x", `return ${safeExpr};`);
+      } catch (e) {
+        alert("Error parsing function: " + e);
+        return () => 0;
+      }
+    }
+
+    function plotEverything() {
+      const expr = document.getElementById('funcInput').value;
+      const f = parseFunction(expr);
+      plotWaveform(f);
+      plotScaling(f);
+    }
+
+    function plotWaveform(f) {
+      const canvas = document.getElementById('waveformCanvas');
+      const ctx = canvas.getContext('2d');
+      const N = 500;
+      const xs = Array.from({length: N}, (_, i) => i * 2 * Math.PI / N);
+      const points = xs.map(x => ({x: x, y: f(x)}));
+
+      if (waveformChart) waveformChart.destroy();
+
+      waveformChart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: [{ label: 'Waveform', data: points, borderColor: 'black', pointRadius: 0, fill: false, tension: 0.1 }] },
+        options: {
+          animation: false,
+          responsive: false,
+          parsing: false,
+          scales: {
+            x: { type: 'linear', title: { display: true, text: 'x' } },
+            y: { title: { display: true, text: 'f(x)' } }
+          }
+        }
+      });
+    }
+
+    function plotScaling(f) {
+      const errorCanvas = document.getElementById('errorCanvas');
+      const errorCtx = errorCanvas.getContext('2d');
+      if (window.errorChart) window.errorChart.destroy();
+      const canvas = document.getElementById('scalingCanvas');
+      const ctx = canvas.getContext('2d');
+      const x0 = parseFloat(document.getElementById('scaleCenter').value);
+      const xmin = parseFloat(document.getElementById('xmin').value);
+      const xmax = parseFloat(document.getElementById('xmax').value);
+      const ln_s_vals = Array.from({length: 50}, (_, i) => xmin + i * (xmax - xmin) / 49);
+      const s_vals = ln_s_vals.map(x => Math.exp(x));
+      const ln_s = s_vals.map(s => Math.log(s));
+      const energyPoints = s_vals.map(s => ({x: Math.log(s), y: computeAlpha(f, s, x0, 'energy')}));
+      const simResults = s_vals.map(s => {
+        const [a, err] = computeAlpha(f, s, x0, 'similarity', true);
+        return { lnS: Math.log(s), alpha: a, error: err };
+      });
+      const simPoints = simResults.map(p => ({x: p.lnS, y: p.alpha}));
+      const errPoints = simResults.map(p => ({x: p.lnS, y: p.error}));
+
+      if (scalingChart) scalingChart.destroy();
+
+      scalingChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [
+            { label: 'Energy Metric', data: energyPoints, borderColor: 'red', pointRadius: 0, fill: false, tension: 0.1 },
+            { label: 'Similarity Metric', data: simPoints, borderColor: 'blue', pointRadius: 0, fill: false, tension: 0.1 }
+          ]
+        },
+        options: {
+          animation: false,
+          responsive: false,
+          parsing: false,
+          scales: {
+            x: {
+              type: 'linear',
+              title: { display: true, text: 'ln(s)' },
+              min: parseFloat(document.getElementById('xmin').value),
+              max: parseFloat(document.getElementById('xmax').value)
+            },
+            y: {
+              title: { display: true, text: 'Exponent (a)' },
+              min: parseFloat(document.getElementById('ymin').value),
+              max: parseFloat(document.getElementById('ymax').value)
+            }
+          }
+        }
+      });
+
+      window.errorChart = new Chart(errorCtx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: 'Similarity Error',
+            data: errPoints,
+            borderColor: 'purple',
+            pointRadius: 0,
+            fill: false,
+            tension: 0.1
+          }]
+        },
+        options: {
+          animation: false,
+          responsive: false,
+          parsing: false,
+          scales: {
+            x: {
+              type: 'linear',
+              title: { display: true, text: 'ln(s)' },
+              min: parseFloat(document.getElementById('xmin').value),
+              max: parseFloat(document.getElementById('xmax').value)
+            },
+            y: {
+              title: { display: true, text: 'Similarity Error' },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function computeAlpha(f, s, x0, metric, returnError = false) {
+      const N = 300;
+      const xs = Array.from({length: N}, (_, i) => i * 2 * Math.PI / N);
+      const original = xs.map(x => f(x));
+      const scaled = xs.map(x => f((x - x0) / s + x0));
+
+      if (metric === 'energy') {
+        const e_orig = original.reduce((sum, y) => sum + y * y, 0);
+        const e_scaled = scaled.reduce((sum, y) => sum + y * y, 0);
+        return 0.5 * Math.log(e_orig / e_scaled) / Math.log(s);
+      } else {
+        let bestAlpha = 0;
+        let bestErr = Infinity;
+        const aMin = parseFloat(document.getElementById('ymin').value);
+        const aMax = parseFloat(document.getElementById('ymax').value);
+        for (let a = aMin; a <= aMax; a += 0.05) {
+          const scaledA = scaled.map(y => Math.pow(s, a) * y);
+          const err = scaledA.reduce((sum, y, i) => sum + Math.pow(y - original[i], 2), 0);
+          if (err < bestErr) {
+            bestErr = err;
+            bestAlpha = a;
+          }
+        }
+        return returnError ? [bestAlpha, bestErr] : bestAlpha;
+      }
+    }
+
+    window.onload = () => {
+      updateMacroSelect();
+      plotEverything();
+      document.getElementById('scaleCenter').addEventListener('input', () => plotScaling(parseFunction(document.getElementById('funcInput').value)));
+    };
+  </script>
+</body>
+</html>
