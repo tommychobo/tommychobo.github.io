@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Julia Set RGB Explorer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to bottom, #1e1e2f, #2e2e3f);
+      color: white;
+      margin: 0;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    canvas {
+      border: 2px solid white;
+      image-rendering: pixelated;
+    }
+    .controls {
+      margin-bottom: 2em;
+      padding: 1em;
+      background-color: #333;
+      border-radius: 1em;
+      box-shadow: 0 0 10px #000;
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 0.75em;
+    }
+    .controls label, .controls button, .controls select {
+      display: block;
+      color: white;
+    }
+    input, select, button {
+      padding: 0.5em;
+      border-radius: 0.3em;
+      border: none;
+      font-size: 1em;
+    }
+    select {
+      color: black !important;
+      background-color: white;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      font-size: 1.1em;
+      padding: 0.6em 1.2em;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    button.stop {
+      background-color: #D32F2F;
+    }
+    .display-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2em;
+    }
+    .mandelbrot-panel {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1em;
+    }
+    .channel-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+    }
+    .channel-buttons button {
+      width: 4em;
+      height: 2em;
+      background-color: #666;
+    }
+    .channel-buttons button.active-red {
+      background-color: red;
+    }
+    .channel-buttons button.active-green {
+      background-color: green;
+    }
+    .channel-buttons button.active-blue {
+      background-color: blue;
+    }
+    #timeDisplay {
+      font-weight: bold;
+      margin-top: 0.5em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Julia Set RGB Explorer</h2>
+
+  <!-- Controls for user input and configuration -->
+  <div class="controls">
+    
+    <label style="grid-column: span 2;">Macro Name: <input type="text" id="macroName" style="width: 100%;"></label>
+    <label>Red Real Equation: <input type="text" id="redReal" value="0.285"></label>
+    <label>Red Imag Equation: <input type="text" id="redImag" value="0"></label>
+    <label>Green Real Equation: <input type="text" id="greenReal" value="0.285"></label>
+    <label>Green Imag Equation: <input type="text" id="greenImag" value="0.01 * sin(t)"></label>
+    <label>Blue Real Equation: <input type="text" id="blueReal" value="0.285"></label>
+    <label>Blue Imag Equation: <input type="text" id="blueImag" value="0.01 * cos(t)"></label>
+    <label>Max Iterations: <input type="number" id="maxIter" value="300"></label>
+    <label>Color Fade Strength: <input type="number" step="0.01" id="fadeStrength" value="0.5"></label>
+    <label>Camera Real Position (t): <input type="text" id="cameraRe" value="0"></label>
+    <label>Camera Imag Position (t): <input type="text" id="cameraIm" value="0"></label>
+    <label>Camera Rotation Angle (rad): <input type="text" id="cameraAngle" value="0"></label>
+    <label>Camera Scale (t): <input type="text" id="cameraScale" value="1"></label>
+    <button id="toggleBtn" onclick="toggleAnimation()">Run</button>
+    <button onclick="saveMacro()">Save Macro</button>
+    <div id="timeDisplay">t = 0.0s</div>
+    <label>Saved Macros:
+      <select id="macroSelect" onchange="loadMacro()">
+        <option value="">--Select--</option>
+      </select>
+    </label>
+    <label>Render Length (s): <input type="number" id="renderLength" value="5"></label>
+    <button onclick="startRender()">Render</button>
+  </div>
+
+  <!-- Visualization panels -->
+  <div class="display-container">
+    <div class="mandelbrot-panel">
+      <div class="channel-buttons">
+        <button id="selectRed" onclick="selectChannel('red')">Red</button>
+        <button id="selectGreen" onclick="selectChannel('green')">Green</button>
+        <button id="selectBlue" onclick="selectChannel('blue')">Blue</button>
+        <button onclick="zoomIn()">Zoom+</button>
+        <button onclick="zoomOut()">Zoom-</button>
+      </div>
+      <canvas id="mandelbrot" width="300" height="300"></canvas>
+    </div>
+    <canvas id="julia" width="600" height="600"></canvas>
+  </div>
+
+  <!-- JavaScript logic follows -->
+  <script>
+    let t = 0;
+    let animationInterval;
+    let selectedChannel = 'red';
+    let mandelZoom = 1;
+    let mandelCenter = { x: 0, y: 0 };
+    let mandelImageData = null;
+    const macros = {};
+
+    function evaluate(expr, t) {
+      try {
+        return Function('t', `with (Math) { return ${expr} }`)(t);
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function getComplexFromInputs(color, t) {
+      const re = evaluate(document.getElementById(color + 'Real').value, t);
+      const im = evaluate(document.getElementById(color + 'Imag').value, t);
+      return { re, im };
+    }
+
+    ['redReal', 'redImag', 'greenReal', 'greenImag', 'blueReal', 'blueImag'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        if (!animationInterval) drawMandelbrot();
+        else updateDots();
+      });
+    });
+
+    function renderJulia(t) {
+      const canvas = document.getElementById('julia');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      const imageData = ctx.createImageData(width, height);
+
+      const camRe = evaluate(document.getElementById('cameraRe').value, t);
+      const camIm = evaluate(document.getElementById('cameraIm').value, t);
+      const camAngle = evaluate(document.getElementById('cameraAngle').value, t);
+      const camScale = evaluate(document.getElementById('cameraScale').value, t);
+      const cosA = Math.cos(camAngle);
+      const sinA = Math.sin(camAngle);
+      const scale = (4 / width) / camScale;
+      const maxIter = parseInt(document.getElementById('maxIter').value);
+      const fade = parseFloat(document.getElementById('fadeStrength').value);
+
+      const channels = ['red', 'green', 'blue'];
+      const julias = channels.map(ch => getComplexFromInputs(ch, t));
+
+      for (let py = 0; py < height; py++) {
+        for (let px = 0; px < width; px++) {
+          const dx = (px - width / 2) * scale;
+          const dy = (py - height / 2) * scale;
+          const x = camRe + dx * cosA - dy * sinA;
+          const y = camIm + dx * sinA + dy * cosA;
+
+          const color = [0, 0, 0];
+
+          for (let c = 0; c < 3; c++) {
+            let zx = x, zy = y, i = 0;
+            while (zx*zx + zy*zy < 4 && i < maxIter) {
+              const tmp = zx*zx - zy*zy + julias[c].re;
+              zy = 2*zx*zy + julias[c].im;
+              zx = tmp;
+              i++;
+            }
+            const intensity = i === maxIter ? 255 : 255 * Math.pow(i / maxIter, fade);
+            color[c] = intensity;
+          }
+
+          const index = (py * width + px) * 4;
+          imageData.data.set([...color, 255], index);
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    function drawMandelbrot() {
+      const canvas = document.getElementById('mandelbrot');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      const imageData = ctx.createImageData(width, height);
+      const scale = 4 / (width * mandelZoom);
+      const maxIter = 200;
+
+      for (let py = 0; py < height; py++) {
+        for (let px = 0; px < width; px++) {
+          const x0 = mandelCenter.x + (px - width / 2) * scale;
+          const y0 = mandelCenter.y + (py - height / 2) * scale;
+          let x = 0, y = 0, i = 0;
+          while (x * x + y * y <= 4 && i < maxIter) {
+            const xtemp = x * x - y * y + x0;
+            y = 2 * x * y + y0;
+            x = xtemp;
+            i++;
+          }
+          const color = i === maxIter ? 0 : 255 - Math.floor(255 * i / maxIter);
+          const index = (py * width + px) * 4;
+          imageData.data.set([color, color, color, 255], index);
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      mandelImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      drawDots();
+      return;
+    }
+
+    function drawDots() {
+      const ctx = document.getElementById('mandelbrot').getContext('2d');
+      const scale = 4 / (ctx.canvas.width * mandelZoom);
+      const colors = ['red', 'green', 'blue'];
+      colors.forEach(color => {
+        const c = getComplexFromInputs(color, t); // use current t instead of 0
+        const x = ctx.canvas.width / 2 + (c.re - mandelCenter.x) * (ctx.canvas.width * mandelZoom / 4);
+        const y = ctx.canvas.height / 2 + (c.im - mandelCenter.y) * (ctx.canvas.height * mandelZoom / 4);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = color;
+        ctx.fill();
+      });
+    }
+
+    function toggleAnimation() {
+      const btn = document.getElementById('toggleBtn');
+      if (animationInterval) {
+        clearInterval(animationInterval);
+        animationInterval = null;
+        btn.textContent = 'Run';
+        btn.classList.remove('stop');
+        t = 0;
+        return;
+      }
+      t = 0;
+      btn.textContent = 'Stop';
+      btn.classList.add('stop');
+      animationInterval = setInterval(() => {
+        renderJulia(t);
+        updateDots();
+        document.getElementById('timeDisplay').textContent = `t = ${t.toFixed(2)}s`;
+        t += 0.033;
+      }, 33);
+    }
+
+    function selectChannel(ch) {
+      selectedChannel = ch;
+      ['red', 'green', 'blue'].forEach(c => {
+        document.getElementById('select' + c.charAt(0).toUpperCase() + c.slice(1)).classList.remove('active-' + c);
+      });
+      document.getElementById('select' + ch.charAt(0).toUpperCase() + ch.slice(1)).classList.add('active-' + ch);
+    }
+
+    function zoomIn() {
+      const c = getComplexFromInputs(selectedChannel, 0);
+      mandelCenter = { x: c.re, y: c.im };
+      mandelZoom *= 2;
+      drawMandelbrot();
+    }
+
+    function zoomOut() {
+      mandelCenter = { x: 0, y: 0 };
+      mandelZoom = 1;
+      drawMandelbrot();
+    }
+
+    function saveMacro() {
+      const name = document.getElementById('macroName').value;
+      if (!name) return;
+      macros[name] = {
+        redReal: document.getElementById('redReal').value,
+        redImag: document.getElementById('redImag').value,
+        greenReal: document.getElementById('greenReal').value,
+        greenImag: document.getElementById('greenImag').value,
+        blueReal: document.getElementById('blueReal').value,
+        blueImag: document.getElementById('blueImag').value,
+        maxIter: document.getElementById('maxIter').value,
+        fadeStrength: document.getElementById('fadeStrength').value,
+        cameraRe: document.getElementById('cameraRe').value,
+        cameraIm: document.getElementById('cameraIm').value,
+        cameraAngle: document.getElementById('cameraAngle').value,
+        cameraScale: document.getElementById('cameraScale').value
+      };
+      const option = document.createElement('option');
+      option.text = name;
+      option.value = name;
+      document.getElementById('macroSelect').appendChild(option);
+    }
+
+    function loadMacro() {
+      const name = document.getElementById('macroSelect').value;
+      if (!macros[name]) return;
+      const m = macros[name];
+      document.getElementById('redReal').value = m.redReal;
+      document.getElementById('redImag').value = m.redImag;
+      document.getElementById('greenReal').value = m.greenReal;
+      document.getElementById('greenImag').value = m.greenImag;
+      document.getElementById('blueReal').value = m.blueReal;
+      document.getElementById('blueImag').value = m.blueImag;
+      document.getElementById('maxIter').value = m.maxIter;
+      document.getElementById('fadeStrength').value = m.fadeStrength;
+      document.getElementById('cameraRe').value = m.cameraRe;
+      document.getElementById('cameraIm').value = m.cameraIm;
+      document.getElementById('cameraAngle').value = m.cameraAngle;
+      document.getElementById('cameraScale').value = m.cameraScale;
+    }
+
+    document.getElementById('mandelbrot').addEventListener('click', function(event) {
+      const canvas = document.getElementById('mandelbrot');
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const scale = 4 / (canvas.width * mandelZoom);
+      const cx = mandelCenter.x + (x - canvas.width / 2) * scale;
+      const cy = mandelCenter.y + (y - canvas.height / 2) * scale;
+
+      const reField = document.getElementById(selectedChannel + 'Real');
+      const imField = document.getElementById(selectedChannel + 'Imag');
+      const reExpr = reField.value.trim();
+      const imExpr = imField.value.trim();
+
+      const reAtZero = evaluate(reExpr, 0);
+      const imAtZero = evaluate(imExpr, 0);
+
+      const reDelta = cx - reAtZero;
+      const imDelta = cy - imAtZero;
+
+      function needsOffset(expr) {
+        const firstChar = expr.trim()[0];
+        return !(firstChar >= '0' && firstChar <= '9' || firstChar === '(' || firstChar === '-');
+      }
+
+      function adjustExpr(delta, expr) {
+        expr = expr.trim();
+        let i = 0;
+        let inParens = 0;
+
+        // Find the first top-level + or - (ignoring parentheses)
+        for (; i < expr.length; i++) {
+            const ch = expr[i];
+            if (ch === '(') inParens++;
+            else if (ch === ')') inParens--;
+            else if ((ch === '+' || ch === '-') && inParens === 0 && i !== 0) break;
+        }
+
+        const head = expr.slice(0, i).trim();
+        const tail = expr.slice(i).trim();
+
+        const num = parseFloat(head);
+        if (!isNaN(num)) {
+            const updated = (num + delta).toFixed(6);
+            return tail ? `${updated} ${tail}` : `${updated}`;
+        }
+
+        // No valid constant at front; just prepend delta
+        return `${delta.toFixed(6)} + ${expr}`;
+      }
+
+      reField.value = adjustExpr(reDelta, reExpr);
+      imField.value = adjustExpr(imDelta, imExpr);
+
+      renderJulia(0);
+      drawMandelbrot();
+    });
+
+    // Initial draw
+    window.addEventListener('load', () => {
+      t = 0;
+      drawMandelbrot();
+      renderJulia(t);
+      document.getElementById('timeDisplay').textContent = `t = ${t.toFixed(2)}s`;
+    });
+  function updateDots() {
+      const canvas = document.getElementById('mandelbrot');
+      const ctx = canvas.getContext('2d');
+      if (mandelImageData) {
+        ctx.putImageData(mandelImageData, 0, 0);
+        drawDots();
+      }
+    }
+  function startRender() {
+  const duration = parseFloat(document.getElementById('renderLength').value);
+  if (isNaN(duration) || duration <= 0) return alert('Invalid duration');
+
+  const canvas = document.getElementById('julia');
+  const stream = canvas.captureStream();
+  const recorder = new MediaRecorder(stream);
+  const chunks = [];
+
+  recorder.ondataavailable = e => chunks.push(e.data);
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'video/mp4' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `julia-${Date.now()}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  let frame = 0;
+  let currentT = 0;
+  const fps = 30;
+  const totalFrames = Math.floor(duration * fps);
+  const interval = 1000 / fps;
+
+  recorder.start();
+  const renderLoop = setInterval(() => {
+    renderJulia(currentT);
+    document.getElementById('timeDisplay').textContent = `t = ${currentT.toFixed(2)}s`;
+    currentT += 1 / fps;
+    frame++;
+    if (frame >= totalFrames) {
+      clearInterval(renderLoop);
+      recorder.stop();
+    }
+  }, interval);
+}
+</script>
+</body>
+</html>

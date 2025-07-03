@@ -130,10 +130,10 @@
                             <p class="text-gray-300 mb-4">
                                 This is a work in progress that currently generates an audio fractal that maps back onto itself when frequency is doubled.
                                 This is done in the hopes of defining a Hilbert space that contains all sound waves.
-                                The audio is generated using the Web Audio API, and the visualization is rendered using Three.js
+                                The audio is generated using the Web Audio API, and the visualization is rendered using Chart.js
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">Three.js</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">Chart.js</span>
                                 <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">JavaScript</span>
                                 <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">Web Audio</span>
 
@@ -145,8 +145,33 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Project 4: MIDI RGB LEDs -->
+                <!-- Project 4: Julia Visuals Explorer -->
+                <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <div class="md:grid md:grid-cols-3 md:gap-8">
+                        <div class="md:col-span-1 mb-4 md:mb-0">
+                             <img src="project_docs/julia_explorer.png" alt="Julia Visuals" class="rounded-md object-cover w-full h-full" onerror="this.onerror=null; this.src='https://placehold.co/600x400';">
+                        </div>
+                        <div class="md:col-span-2">
+                            <h2 class="text-2xl md:text-3xl font-bold text-header mb-2">Julia Set Visual Explorer</h2>
+                            <p class="text-gray-300 mb-4">
+                                An interactive web application that allows users to explore the fascinating world of Julia sets through real-time rendering and manipulation of complex equations.
+                                This project uses HTML5 Canvas for rendering and JavaScript for interactivity, providing a hands-on experience with fractal mathematics.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">HTML5</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">JavaScript</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">Canvas API</span>
+                                <span class="tech-tag text-xs font-semibold px-2 py-1 rounded">WebGL</span>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <!--<a href="#" class="btn-action font-semibold py-2 px-4 rounded-lg">View Simulator</a>-->
+                                <a href="julia_explorer.html" class="btn-action font-semibold py-2 px-4 rounded-lg">Generate Julia Visuals</a>
+                                <!--<a href="#" class="btn-action font-semibold py-2 px-4 rounded-lg">Build Guide</a>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Project 5: MIDI RGB LEDs -->
                 <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
                     <div class="md:grid md:grid-cols-3 md:gap-8">
                         <div class="md:col-span-1 mb-4 md:mb-0">
@@ -171,6 +196,8 @@
                         </div>
                     </div>
                 </div>
+
+                
 
 
             </div>
