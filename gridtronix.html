@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gridtronix</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+        }
+        #gridCanvas {
+            flex-grow: 1;
+            background-color: black;
+            cursor: grab;
+        }
+        #sidebar {
+            width: 300px;
+            background: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #rulesEditor {
+            flex-grow: 1;
+            background: #333;
+            color: #0f0;
+            font-family: monospace;
+            resize: none;
+            width: 100%;
+            height: 100%;
+        }
+        button, input {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gridCanvas"></canvas>
+    <div id="sidebar">
+        <textarea id="rulesEditor">!(R5*G5*B5)=0
+R5*G2+B3=RGB
+</textarea>
+        <button id="runButton">Run</button>
+        <button id="resetButton">Reset Grid</button>
+        <button id="clearButton">Clear Grid</button>
+        <button id="saveButton">Save Rules</button>
+        <label>Update Frequency (Hz):
+            <input type="number" id="freqInput" value="2" min="1" max="60">
+        </label>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        const rulesEditor = document.getElementById('rulesEditor');
+        const runButton = document.getElementById('runButton');
+        const resetButton = document.getElementById('resetButton');
+        const clearButton = document.getElementById('clearButton');
+        const saveButton = document.getElementById('saveButton');
+        const freqInput = document.getElementById('freqInput');
+
+        let grid = {};
+        let initialGrid = {}; // To store initial state
+        let cellSize = 20;
+        let offsetX = 0, offsetY = 0;
+        let dragging = false;
+        let lastMouseX = 0, lastMouseY = 0;
+        let running = false;
+        let timer = null;
+
+        canvas.width = window.innerWidth - 300;
+        canvas.height = window.innerHeight;
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+
+            let cols = Math.ceil(canvas.width / cellSize);
+            let rows = Math.ceil(canvas.height / cellSize);
+
+            for (let i = -1; i < cols + 1; i++) {
+                for (let j = -1; j < rows + 1; j++) {
+                    let x = (i * cellSize + offsetX % cellSize);
+                    let y = (j * cellSize + offsetY % cellSize);
+
+                    let gx = Math.floor((i - Math.floor(offsetX / cellSize)));
+                    let gy = Math.floor((j - Math.floor(offsetY / cellSize)));
+
+                    let key = gx + ',' + gy;
+                    let color = grid[key] || {r: 0, g: 0, b: 0};
+
+                    ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+                    ctx.fillRect(x, y, cellSize, cellSize);
+                    ctx.strokeRect(x, y, cellSize, cellSize);
+                }
+            }
+        }
+
+        function toggleColorAt(mx, my, channel) {
+            let gx = Math.floor((mx - offsetX) / cellSize);
+            let gy = Math.floor((my - offsetY) / cellSize);
+            let key = gx + ',' + gy;
+            let color = grid[key] || {r: 0, g: 0, b: 0};
+            color[channel] = (color[channel] === 255 ? 0 : 255);
+            grid[key] = color;
+            drawGrid();
+        }
+
+        canvas.addEventListener('mousedown', e => {
+            dragging = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            canvas.style.cursor = 'grabbing';
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            if (dragging) {
+                offsetX += e.clientX - lastMouseX;
+                offsetY += e.clientY - lastMouseY;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                drawGrid();
+            } else {
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            dragging = false;
+            canvas.style.cursor = 'grab';
+        });
+        canvas.addEventListener('mouseleave', () => {
+            dragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        window.addEventListener('keydown', e => {
+            let rect = canvas.getBoundingClientRect();
+            let mx = lastMouseX - rect.left;
+            let my = lastMouseY - rect.top;
+            if (mx >= 0 && mx <= canvas.width && my >= 0 && my <= canvas.height) {
+                if (e.key === 'r') toggleColorAt(mx, my, 'r');
+                if (e.key === 'g') toggleColorAt(mx, my, 'g');
+                if (e.key === 'b') toggleColorAt(mx, my, 'b');
+            }
+        });
+
+        runButton.addEventListener('click', () => {
+            running = !running;
+            runButton.textContent = running ? 'Stop' : 'Run';
+            if (running) {
+                // Save initial grid state when simulation starts
+                initialGrid = JSON.parse(JSON.stringify(grid));
+                startSimulation();
+            } else {
+                stopSimulation();
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            // Restore the grid to initial state
+            grid = JSON.parse(JSON.stringify(initialGrid));
+            drawGrid();
+        });
+
+        clearButton.addEventListener('click', () => {
+            grid = {};
+            drawGrid();
+        });
+
+        saveButton.addEventListener('click', () => {
+            localStorage.setItem('gridtronix_rules', rulesEditor.value);
+            alert('Rules saved!');
+        });
+
+        function parseExpression(expr, neighbors) {
+            // Count number of red, green, blue neighbors (includes center pixel)
+            let rCount = neighbors.filter(n => n.r === 255).length;
+            let gCount = neighbors.filter(n => n.g === 255).length;
+            let bCount = neighbors.filter(n => n.b === 255).length;
+
+            // Replace R, G, B counts with integers
+            expr = expr.replace(/\bR\b/g, rCount)
+                       .replace(/\bG\b/g, gCount)
+                       .replace(/\bB\b/g, bCount);
+
+            // Replace R1..R9, G1..G9, B1..B9 with boolean values
+            expr = expr.replace(/R(\d)/g, (_, n) => neighbors[parseInt(n)-1].r === 255);
+            expr = expr.replace(/G(\d)/g, (_, n) => neighbors[parseInt(n)-1].g === 255);
+            expr = expr.replace(/B(\d)/g, (_, n) => neighbors[parseInt(n)-1].b === 255);
+
+            expr = expr.replace(/\*/g, '&&').replace(/\+/g, '||').replace(/!/g, '!');
+            return eval(expr);
+        }
+
+        function applyRules() {
+            let newGrid = {};
+            let rules = rulesEditor.value.split('\n').map(line => line.trim()).filter(line => line);
+
+            let cols = Math.ceil(canvas.width / cellSize);
+            let rows = Math.ceil(canvas.height / cellSize);
+            for (let i = -cols; i < cols; i++) {
+                for (let j = -rows; j < rows; j++) {
+                    let gx = i - Math.floor(offsetX / cellSize);
+                    let gy = j - Math.floor(offsetY / cellSize);
+                    let key = gx + ',' + gy;
+                    let color = grid[key] || {r: 0, g: 0, b: 0};
+
+                    // Get 3x3 neighborhood
+                    let neighbors = [];
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            let nKey = (gx + dx) + ',' + (gy + dy);
+                            neighbors.push(grid[nKey] || {r:0,g:0,b:0});
+                        }
+                    }
+
+                    // Apply all rules in order
+                    for (let rule of rules) {
+                        let [condition, action] = rule.split('=');
+                        if (parseExpression(condition, neighbors)) {
+                            let newColor = {r: color.r, g: color.g, b: color.b};
+                            if (action.includes('0')) {
+                                newColor = {r:0, g:0, b:0};
+                            }
+                            if (action.includes('R')) newColor.r = 255;
+                            if (action.includes('G')) newColor.g = 255;
+                            if (action.includes('B')) newColor.b = 255;
+                            if (!action.includes('R')) newColor.r = 0;
+                            if (!action.includes('G')) newColor.g = 0;
+                            if (!action.includes('B')) newColor.b = 0;
+                            color = newColor; // overwrite previous rule
+                        }
+                    }
+
+                    newGrid[key] = color;
+                }
+            }
+
+            grid = newGrid;
+            drawGrid();
+        }
+
+        function startSimulation() {
+            let interval = 1000 / parseInt(freqInput.value);
+            timer = setInterval(applyRules, interval);
+        }
+
+        function stopSimulation() {
+            clearInterval(timer);
+        }
+
+        const savedRules = localStorage.getItem('gridtronix_rules');
+        if (savedRules) rulesEditor.value = savedRules;
+
+        drawGrid();
+    </script>
+</body>
+</html>

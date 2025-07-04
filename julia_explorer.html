@@ -412,7 +412,8 @@
       renderJulia(t);
       document.getElementById('timeDisplay').textContent = `t = ${t.toFixed(2)}s`;
     });
-  function updateDots() {
+  
+    function updateDots() {
       const canvas = document.getElementById('mandelbrot');
       const ctx = canvas.getContext('2d');
       if (mandelImageData) {
@@ -420,45 +421,46 @@
         drawDots();
       }
     }
-  function startRender() {
-  const duration = parseFloat(document.getElementById('renderLength').value);
-  if (isNaN(duration) || duration <= 0) return alert('Invalid duration');
+  
+    function startRender() {
+      const duration = parseFloat(document.getElementById('renderLength').value);
+      if (isNaN(duration) || duration <= 0) return alert('Invalid duration');
 
-  const canvas = document.getElementById('julia');
-  const stream = canvas.captureStream();
-  const recorder = new MediaRecorder(stream);
-  const chunks = [];
+      const canvas = document.getElementById('julia');
+      const stream = canvas.captureStream();
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
 
-  recorder.ondataavailable = e => chunks.push(e.data);
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: 'video/mp4' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `julia-${Date.now()}.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  };
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `julia-${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
 
-  let frame = 0;
-  let currentT = 0;
-  const fps = 30;
-  const totalFrames = Math.floor(duration * fps);
-  const interval = 1000 / fps;
+      let frame = 0;
+      let currentT = 0;
+      const fps = 30;
+      const totalFrames = Math.floor(duration * fps);
+      const interval = 1000 / fps;
 
-  recorder.start();
-  const renderLoop = setInterval(() => {
-    renderJulia(currentT);
-    document.getElementById('timeDisplay').textContent = `t = ${currentT.toFixed(2)}s`;
-    currentT += 1 / fps;
-    frame++;
-    if (frame >= totalFrames) {
-      clearInterval(renderLoop);
-      recorder.stop();
+      recorder.start();
+      const renderLoop = setInterval(() => {
+        renderJulia(currentT);
+        document.getElementById('timeDisplay').textContent = `t = ${currentT.toFixed(2)}s`;
+        currentT += 1 / fps;
+        frame++;
+        if (frame >= totalFrames) {
+          clearInterval(renderLoop);
+          recorder.stop();
+        }
+      }, interval);
     }
-  }, interval);
-}
-</script>
+  </script>
 </body>
 </html>
