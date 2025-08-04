@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Live Looping Performances</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+        .card-bg {
+            background-color: #1F2937; /* Dark Gray / Gray-800 */
+        }
+        .btn-action {
+            background-color: #4B5563; /* Dark Gray / Gray-600 */
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .tech-tag {
+            background-color: #4A5C50; /* Murky Green */
+            color: #E5E7EB; /* Gray-200 */
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-header">Thomas Choboter</a>
+            <div>
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="resume.html" class="text-gray-300 hover:text-accent mx-3">R&eacute;sum&eacute;</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="music.html" class="text-gray-300 hover:text-accent mx-3">Music</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-header mb-2">Live Looping Performances</h1>
+            <p class="text-lg text-gray-400 mb-12">A collection of my acoustic live-looping performances.</p>
+
+            <div class="space-y-12">
+
+                <!-- Performance 1: YouTube Example -->
+                <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-header mb-4">Performance Title 1</h2>
+                    <p class="text-gray-300 mb-4">
+                        Description of this performance - when/where it was recorded, equipment used, or any special notes.
+                    </p>
+                    
+                    <!-- YouTube Embed -->
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen></iframe>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3 mt-4">
+                        <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" 
+                           target="_blank" 
+                           class="btn-action font-semibold py-2 px-4 rounded-lg">
+                            Watch on YouTube
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Performance 2: Instagram Example -->
+                <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-header mb-4">Performance Title 2</h2>
+                    <p class="text-gray-300 mb-4">
+                        Description of this Instagram performance - maybe it's a short clip from a longer session.
+                    </p>
+                    
+                    <!-- Instagram Embed -->
+                    <div class="video-container">
+                        <iframe src="https://www.instagram.com/p/YOUR_POST_ID/embed" 
+                                frameborder="0" 
+                                scrolling="no" 
+                                allowtransparency="true"></iframe>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3 mt-4">
+                        <a href="https://www.instagram.com/p/YOUR_POST_ID/" 
+                           target="_blank" 
+                           class="btn-action font-semibold py-2 px-4 rounded-lg">
+                            View on Instagram
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Performance 3: Another YouTube Example -->
+                <div class="card-bg p-6 md:p-8 rounded-lg shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-header mb-4">Performance Title 3</h2>
+                    <p class="text-gray-300 mb-4">
+                        Another performance description with details about the setup or location.
+                    </p>
+                    
+                    <!-- YouTube Embed -->
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/ANOTHER_VIDEO_ID" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen></iframe>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3 mt-4">
+                        <a href="https://www.youtube.com/watch?v=ANOTHER_VIDEO_ID" 
+                           target="_blank" 
+                           class="btn-action font-semibold py-2 px-4 rounded-lg">
+                            Watch on YouTube
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <section id="support-me" class="text-center py-10">
+            <h2 class="text-2xl font-bold text-header">Enjoy My Music?</h2>
+            <p class="text-gray-400 mt-2 mb-6 max-w-2xl mx-auto">If you enjoy my live-looping performances, consider supporting me with a small donation through PayPal. It helps fund new equipment and creative projects!</p>
+            <a href="https://www.paypal.me/tchoboter" target="_blank" rel="noopener noreferrer" class="inline-block btn-action font-semibold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-crimson-500/20">
+                ☕ Buy Me A Coffee
+            </a>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
