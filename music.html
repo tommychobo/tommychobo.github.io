@@ -36,6 +36,21 @@
             background-color: #22D3EE; /* Bright Cyan */
             transition: width 0.1s linear;
         }
+        .card-bg {
+            background-color: #1F2937; /* Dark Gray / Gray-800 */
+        }
+        .btn-action {
+            background-color: #4B5563; /* Dark Gray / Gray-600 */
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .tech-tag {
+            background-color: #4A5C50; /* Murky Green */
+            color: #E5E7EB; /* Gray-200 */
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -63,6 +78,7 @@
      <!-- Main Content -->
     <main class="container mx-auto px-6 py-12 md:py-16">
         <div class="max-w-4xl mx-auto">
+            
             <h1 class="text-4xl md:text-5xl font-bold text-header mb-2">Music Catalog</h1>
             <p class="text-lg text-gray-400 mb-10">
                 I don't know why I have this drive to make and share music,
@@ -71,10 +87,13 @@
                 <br><br>
                 My music is free to listen to, download, and share. I hope you find something in it that resonates with you.
                 <br><br>
-                ONE IN THE WAVE Coming Soon
+                Grandeur and the Delusions Coming Soon
                 <br><br>
             </p>
-
+            <div class="text-center mb-12">
+                <a href="loops.html" class="inline-block btn-action font-semibold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-crimson-500/20">
+                    Acoustic Performance Videos ➡️</a>
+            </div>
             <!-- Playlist will be rendered here by JavaScript -->
             <div id="playlist-container" class="space-y-4">
                 <!-- JS will populate this -->
