@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Choboter - Music</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #111827; /* Almost Black / Gray-900 */
+            color: #D1D5DB; /* Gray-300 */
+        }
+        .text-accent {
+            color: #22D3EE; /* Bright Cyan */
+        }
+        .text-header {
+            color: #F9FAFB; /* Off-white */
+        }
+        .play-button:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .play-button {
+            background-color: #4A5C50; /* Murky Green */
+            transition: background-color 0.3s;
+        }
+        .progress-bar-bg {
+            background-color: #4B5563; /* Gray-600 */
+        }
+        .progress-bar-fg {
+            background-color: #22D3EE; /* Bright Cyan */
+            transition: width 0.1s linear;
+        }
+        .card-bg {
+            background-color: #1F2937; /* Dark Gray / Gray-800 */
+        }
+        .btn-action {
+            background-color: #4B5563; /* Dark Gray / Gray-600 */
+            color: #F9FAFB;
+            transition: background-color 0.3s;
+        }
+        .btn-action:hover {
+            background-color: #DC143C; /* Crimson */
+        }
+        .tech-tag {
+            background-color: #4A5C50; /* Murky Green */
+            color: #E5E7EB; /* Gray-200 */
+        }
+        .description-details {
+            margin-top: 1rem;
+            background-color: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 3px solid #22D3EE;
+        }
+        .description-details summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #D1D5DB;
+        }
+        .description-details pre, .description-details div {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Share Tech Mono', monospace;
+            color: #9CA3AF;
+            margin-top: 0.5rem;
+        }
+        .reaction-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform 0.2s ease, opacity 0.3s ease;
+        }
+        .reaction-button:hover {
+            transform: scale(1.2);
+        }
+        /* --- ADDED: Style for disabled buttons --- */
+        .reaction-button.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+        .artwork {
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <audio id="audio-player"></audio>
+
+    <header class="bg-gray-800/70 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div id="global-timeout-bar-bg" class="w-full h-1.5 bg-gray-600/50 hidden">
+            <div id="global-timeout-bar-fg" class="h-full bg-cyan-400" style="width: 0%;"></div>
+        </div>
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="home.html" class="text-2xl font-bold text-header">Thomas Choboter's Dynamic Album</a>
+            <div>
+                <a href="index.html" class="text-gray-300 hover:text-accent mx-3">Home</a>
+                <a href="blog.html" class="text-gray-300 hover:text-accent mx-3">Blog</a>
+                <a href="services.html" class="text-gray-300 hover:text-accent mx-3">Services</a>
+                <a href="projects.html" class="text-gray-300 hover:text-accent mx-3">Projects</a>
+                <a href="loops.html" class="text-gray-300 hover:text-accent mx-3">LIVE LOOPS</a>
+                <a href="events.html" class="text-gray-300 hover:text-accent mx-3">Events</a>
+                <a href="contact.html" class="text-gray-300 hover:text-accent mx-3">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+     <main class="container mx-auto px-6 py-12 md:py-16">
+        <div class="max-w-4xl mx-auto">
+            
+            <h1 class="text-4xl md:text-5xl font-bold text-header mb-2">Grandeur and the Delusions</h1>
+            
+            <details class="description-details mb-10">
+                <summary class="text-lg">info</summary>
+                <div class="text-lg text-gray-400 mt-4">
+<br>
+Hey, I'm Thomas. This is my album! This entire webpage! 
+This website is a permanent record of my music being created and shared. I want to run it a bit like a custom social media platform where I can just post music and anyone can listen instantly for free.
+
+Thank you to Boycott Daylight (Zane Warsen, Jack Klein, Owen Peters, James Ernst), Liam Shutt, Cameron King, Griffin Breshears, David Fedor, Liam McDougal, Andrew Bernard, Nadia Gremillion, Garrett Beecher, Andrew Hamson, my dad Paul Choboter, Ryan Morris, Cooper Durkey, Luca Carnevale, Alex Ong, Ben Geil, Marley Paltiel, Chris Marston, Max Chalekson, David Frismodt, Josh Baum, Owen Daulton, Elijah Esparza, David Landers, Pat Monson, and everyone else who has supported me, encouraged me to keep going, or jammed with me. You profoundly shaped my musical journey. This music would not exist in its current form without you.
+
+The first song is "After the End." The last one is "Infrastructure," which is also the most recently recorded; songs auto-play upwards instead of downwards, because this is my website and I can do things however I want to.
+
+Enjoy the journey! Spread joy!
+                </div>
+            </details>
+
+            <div class="text-center mb-12">
+                <a href="loops.html" class="inline-block btn-action font-semibold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-crimson-500/20">
+                    Live Recordings and Videos ➡️</a>
+            </div>
+            <div id="playlist-container" class="space-y-4">
+            </div>
+
+            
+            </div>
+    </main>
+    
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm">&copy; 2025 Thomas Choboter. No Rights Reserved. Punk rock for eternity.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- FIREBASE CONFIGURATION ---
+            const firebaseConfig = {
+                apiKey: "AIzaSyAr48kbj7a8jFOoqYAiS0C971YBSdKG_7g",
+                authDomain: "grandeur-enjoyment-ratings.firebaseapp.com",
+                databaseURL: "https://grandeur-enjoyment-ratings-default-rtdb.firebaseio.com",
+                projectId: "grandeur-enjoyment-ratings",
+                storageBucket: "grandeur-enjoyment-ratings.firebasestorage.app",
+                messagingSenderId: "143762067540",
+                appId: "1:143762067540:web:610f8e125c116b73ecddc1"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+            
+            // --- DATA & STATE ---
+            // MODIFICATION: Changed duplicate background colors to be unique
+            const tracks = [
+                { id: 'track20', title: 'Infrastructure', artist: 'Tommy Choboter', audioSrc: 'my_music/infrastructure.mp3', imageSrc: 'pictures/infrastructure_cover.png', bgColor: 'rgba(50, 255, 0, 0.1)'}, // Original Unique (Bright Green)
+                { id: 'track5', title: 'I Wish I', artist: 'Tommy Choboter', audioSrc: 'my_music/i_wish_i.mp3', imageSrc: 'pictures/i_wish_i_cover.jpg', bgColor: 'rgba(34, 211, 238, 0.1)' }, // Original Cyan
+                { id: 'track7', title: 'Red \& Blue', artist: 'Tommy Choboter', audioSrc: 'my_music/red_blue.mp3', imageSrc: 'pictures/red_blue_cover.png', bgColor: 'rgba(74, 92, 80, 0.2)' }, // Original Murky Green
+                { id: 'track10', title: 'Spirits', artist: 'Tommy Choboter', audioSrc: 'my_music/spirits.mp3', imageSrc: 'https://placehold.co/100x100/22D3EE/111827?text=SPI', bgColor: 'rgba(59, 130, 246, 0.1)' }, // New: Blue
+                { id: 'track11', title: 'Finish Line', artist: 'Tommy Choboter', audioSrc: 'my_music/finish_line.mp3', imageSrc: 'https://placehold.co/100x100/00CC99/111827?text=FIN', bgColor: 'rgba(0, 204, 153, 0.1)' }, // Original Unique (Mint)
+                { id: 'track9', title: 'Bluebird', artist: 'Tommy Choboter', audioSrc: 'my_music/Bluebird_speed.mp3', imageSrc: 'pictures/bluebird_cover.png', bgColor: 'rgba(20, 184, 166, 0.15)' }, // New: Teal
+                { id: 'track8', title: 'Little Devil', artist: 'Tommy Choboter', audioSrc: 'my_music/little_devil.mp3', imageSrc: 'pictures/little_devil_cover.png', bgColor: 'rgba(220, 20, 60, 0.1)' }, // Original Crimson
+                { id: 'track6', title: 'Nothing Yet - Tommy\'s Version', artist: 'Boycott Daylight', audioSrc: 'my_music/nothing_yet_tommy.mp3', imageSrc: 'pictures/nothing_yet_cover.png', bgColor: 'rgba(239, 68, 68, 0.1)' }, // New: Bright Red
+                { id: 'track1', title: 'The Factory', artist: 'Tommy Choboter', audioSrc: 'my_music/factory.mp3', imageSrc: 'https://placehold.co/100x100/DC140A/FFFFFF?text=F(t)', bgColor: 'rgba(220, 20, 10, 0.1)' }, // Original Unique (Dark Red)
+                { id: 'track2', title: 'Eternal Computer', artist: 'Tommy Choboter', audioSrc: 'my_music/eternal_computer.mp3', imageSrc: 'pictures/eternal_computer.webp', bgColor: 'rgba(77, 153, 0, 0.1)' }, // Original Unique (Olive)
+                { id: 'track3', title: 'Vitals', artist: 'Tommy Choboter', audioSrc: 'my_music/vitals.mp3', imageSrc: 'https://placehold.co/100x100/DC143C/FFFFFF?text=_/\\__', bgColor: 'rgba(249, 115, 22, 0.1)' }, // New: Orange
+                { id: 'track12', title: 'What Do You Know About Destiny', artist: 'Liam Shutt and Tommy Choboter', audioSrc: 'my_music/destiny_liam.mp3', imageSrc: 'pictures/destiny_liam_cover.png', bgColor: 'rgba(255, 51, 204, 0.1)' }, // Original Unique (Hot Pink)
+                { id: 'track13', title: 'Summertime', artist: 'Liam Shutt and Tommy Choboter', audioSrc: 'my_music/summertime_liam.mp3', imageSrc: 'pictures/summertime_liam_cover.png', bgColor: 'rgba(100, 116, 139, 0.2)' }, // New: Slate
+                { id: 'track14', title: 'Flowing Through The Room', artist: 'Tommy Choboter', audioSrc: 'my_music/my_room.mp3', imageSrc: 'pictures/flow_room_cover.png', bgColor: 'rgba(13, 148, 136, 0.2)' }, // New: Dark Teal
+                { id: 'track23', title: 'Penguin Cock Ballad (explicit version - SKIP IF UNDER 18 (not really))', artist: 'Cam King and Tommy Choboter', audioSrc: 'my_music/penguin_pt2.mp3', imageSrc: 'pictures/penguin_pt2_cover.png', bgColor: 'rgba(120, 113, 108, 0.2)' }, // New: Stone
+                { id: 'track15', title: 'This Weekend', artist: 'Tommy Choboter', audioSrc: 'my_music/this_weekend.mp3', imageSrc: 'https://placehold.co/100x100/DC143C/FFFFFF?text=WEEK', bgColor: 'rgba(219, 39, 119, 0.1)' }, // New: Pink
+                { id: 'track16', title: 'IDK', artist: 'Tommy Choboter', audioSrc: 'my_music/idk2.mp3', imageSrc: 'https://placehold.co/100x100/4A8C50/FFFFFF?text=idk', bgColor: 'rgba(74, 140, 80, 0.2)' }, // Original Murky Green
+                { id: 'track25', title: 'Burning Bright', artist:'Tommy Choboter', audioSrc: 'my_music/BurningBright2.mp3', imageSrc: 'pictures/burning_bright_cover.jpg', bgColor: 'rgba(132, 204, 22, 0.2)' }, // New: Lime
+                { id: 'track24', title: 'Simplicity', artist: 'Tommy Choboter', audioSrc: 'my_music/simplicity_remastered.mp3', imageSrc: 'pictures/simplicity.png', bgColor: 'rgba(34, 197, 94, 0.2)' }, // New: Emerald
+                { id: 'track21', title: 'Forged by the Love of My Ancestors', artist: 'Tommy Choboter', audioSrc: 'my_music/ancestors.mp3', imageSrc: 'https://placehold.co/100x100/4A8C50/FFFFFF?text=<3', bgColor: 'rgba(16, 185, 129, 0.2)' }, // New: Darker Emerald
+                { id: 'track4', title: 'Focus', artist: 'trublshot (Tommy Choboter)', audioSrc: 'my_music/focus.mp3', imageSrc: 'pictures/focus_cover.png', bgColor: 'rgba(191, 64, 191, 0.2)' }, // Original Unique (Purple)
+                { id: 'track17', title: 'Sisyphus', artist: 'Tommy Choboter', audioSrc: 'my_music/trippyprog.mp3', imageSrc: 'https://placehold.co/100x100/4A5C50/FFFFFF?text=ROCK', bgColor: 'rgba(71, 85, 105, 0.2)'}, // New: Dark Slate
+                { id: 'track26', title: 'Conquer Mars!', artist: 'Tommy Choboter', audioSrc: 'my_music/conquermars.mp3', imageSrc: 'https://placehold.co/100x100/4A5C50/FFFFFF?text=MARS', bgColor: 'rgba(156, 163, 175, 0.2)'}, // New: Gray
+                { id: 'track18', title: 'Want', artist: 'Tommy Choboter', audioSrc: 'my_music/want.mp3', imageSrc: 'https://placehold.co/100x100/22D3EE/111827?text=WANT', bgColor: 'rgba(14, 165, 233, 0.15)'}, // New: Sky Blue
+                { id: 'track19', title: 'Welcome to Life', artist: 'Tommy Choboter', audioSrc: 'my_music/welcome.mp3', imageSrc: 'https://placehold.co/100x100/4A5C50/FFFFFF?text=:)', bgColor: 'rgba(107, 114, 128, 0.2)' }, // New: Dark Gray
+                { id: 'track22', title: 'After the End', artist:'Tommy Choboter', audioSrc: 'my_music/After_the_end.mp3', imageSrc: 'pictures/sandenchanter.PNG', bgColor: 'rgba(82, 82, 91, 0.2)' } // New: Zinc
+            ];
+
+            const audioPlayer = document.getElementById('audio-player');
+            const playlistContainer = document.getElementById('playlist-container');
+            let currentTrackId = null;
+            let trackDurations = {};
+            let localIgnoranceScores = {}; 
+            let isTimeoutActive = false; // Global timeout flag
+            let timeoutInterval; // Holds the interval for the progress bar
+
+            // --- RENDER PLAYLIST ---
+            function renderPlaylist() {
+                let content = '';
+                tracks.forEach(track => {
+                    localIgnoranceScores[track.id] = 0;
+                    const descriptionHtml = track.description ? `<details class="description-details"><summary>Details</summary><pre>${track.description}</pre></details>` : '';
+                    content += `
+                        <div class="card-bg p-4 rounded-lg">
+                            <div class="flex items-center gap-4">
+                                <img id="art-${track.id}" src="${track.imageSrc}" alt="Album art for ${track.title}" class="artwork w-16 h-16 md:w-20 md:h-20 rounded-md shadow-md self-start" onerror="this.onerror=null; this.src='https://placehold.co/100x100/374151/FFFFFF?text=ART';">
+                                <div class="flex-grow">
+                                    <div id="${track.id}" class="track-row flex items-center gap-4" style="background-color: ${track.bgColor}; padding: 1rem; border-radius: 0.375rem;">
+                                        <div class="flex-grow">
+                                            <div>
+                                                <h3 class="text-xl font-bold text-header">${track.title}</h3>
+                                                <p class="text-gray-400">${track.artist}</p>
+                                                <div class="w-full progress-bar-bg rounded-full h-1.5 mt-2 overflow-hidden">
+                                                    <div id="progress-${track.id}" class="progress-bar-fg h-full rounded-full" style="width: 0%;"></div>
+                                                </div>
+                                            </div>
+                                            <div id="reactions-${track.id}" class="reactions-container hidden flex items-center justify-around text-center gap-x-3 md:gap-x-4 mt-3">
+                                                <div class="flex flex-col items-center">
+                                                    <button class="ignorance-button reaction-button" data-track-id="${track.id}" title="Ignorance">😈</button>
+                                                    <div id="ignorance-count-${track.id}" class="font-mono text-purple-400 text-sm">0</div>
+                                                </div>
+                                                <div class="flex flex-col items-center">
+                                                    <button class="understanding-button reaction-button" data-track-id="${track.id}" title="Understanding">🤔</button>
+                                                    <div id="understanding-count-${track.id}" class="font-mono text-cyan-400 text-sm">...</div>
+                                                </div>
+                                                <div class="flex flex-col items-center">
+                                                    <button class="enjoyment-button reaction-button" data-track-id="${track.id}" title="Enjoyment">❤️</button>
+                                                    <div id="enjoyment-count-${track.id}" class="font-mono text-red-400 text-sm">...</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button data-track-id="${track.id}" class="play-button flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-full text-white text-2xl flex items-center justify-center shadow-lg">
+                                            <span id="icon-${track.id}">▶</span>
+                                        </button>
+                                        <div class="w-24 text-center text-gray-400 font-mono">
+                                            <span id="time-${track.id}">00:00 / --:--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             ${descriptionHtml}
+                        </div>
+                    `;
+                });
+                playlistContainer.innerHTML = content;
+                attachReactionListeners();
+                listenForReactionUpdates();
+            }
+
+            // --- EVENT LISTENERS ---
+            playlistContainer.addEventListener('click', function(e) {
+                if (e.target && e.target.closest('.play-button')) {
+                    const button = e.target.closest('.play-button');
+                    const trackId = button.dataset.trackId;
+                    handlePlayPause(trackId);
+                }
+            });
+
+            audioPlayer.addEventListener('timeupdate', updateProgress);
+            audioPlayer.addEventListener('loadedmetadata', updateDurationDisplay);
+            audioPlayer.addEventListener('ended', handleTrackEnd);
+
+            // --- PLAYER LOGIC ---
+            function handlePlayPause(trackId) {
+                const track = tracks.find(t => t.id === trackId);
+                if (!track) return;
+
+                if (currentTrackId === trackId && !audioPlayer.paused) {
+                    audioPlayer.pause();
+                    updatePlayIcon(trackId, false);
+                    setArtworkSize(trackId, false);
+                    document.getElementById(`reactions-${trackId}`).classList.add('hidden');
+                } else {
+                    if (currentTrackId && currentTrackId !== trackId) {
+                        resetTrackUI(currentTrackId);
+                    }
+                    currentTrackId = trackId;
+                    if (audioPlayer.src !== new URL(track.audioSrc, window.location.href).href) {
+                        audioPlayer.src = track.audioSrc;
+                    }
+                    audioPlayer.play().then(() => {
+                        updatePlayIcon(trackId, true);
+                        setArtworkSize(trackId, true);
+                        document.querySelectorAll('.reactions-container').forEach(el => el.classList.add('hidden'));
+                        document.getElementById(`reactions-${trackId}`).classList.remove('hidden');
+                    }).catch(err => console.error("Playback error:", err));
+                }
+            }
+            
+            function handleTrackEnd() {
+                if (currentTrackId) {
+                    const currentIndex = tracks.findIndex(t => t.id === currentTrackId);
+                    resetTrackUI(currentTrackId);
+                    currentTrackId = null; 
+
+                    if (currentIndex > 0) {
+                        const previousTrack = tracks[currentIndex - 1];
+                        handlePlayPause(previousTrack.id);
+                    }
+                }
+            }
+            
+            function resetTrackUI(trackId) {
+                const iconEl = document.getElementById(`icon-${trackId}`);
+                if (iconEl) iconEl.textContent = '▶';
+                const progressBar = document.getElementById(`progress-${trackId}`);
+                if (progressBar) progressBar.style.width = '0%';
+                const timeDisplay = document.getElementById(`time-${trackId}`);
+                const duration = trackDurations[trackId];
+                if (timeDisplay && duration) {
+                    timeDisplay.textContent = `00:00 / ${formatTime(duration)}`;
+                } else if (timeDisplay) {
+                    timeDisplay.textContent = `00:00 / --:--`;
+                }
+                setArtworkSize(trackId, false);
+                const reactionsEl = document.getElementById(`reactions-${trackId}`);
+                if (reactionsEl) reactionsEl.classList.add('hidden');
+            }
+
+            // --- HELPER FUNCTIONS ---
+            function setArtworkSize(trackId, isExpanded) {
+                const artElement = document.getElementById(`art-${trackId}`);
+                if (!artElement) return;
+                const normalClasses = ['w-16', 'h-16', 'md:w-20', 'md:h-20'];
+                const expandedClasses = ['w-64', 'h-64', 'md:w-72', 'md:h-72'];
+                if (isExpanded) {
+                    artElement.classList.remove(...normalClasses);
+                    artElement.classList.add(...expandedClasses);
+                } else {
+                    artElement.classList.remove(...expandedClasses);
+                    artElement.classList.add(...normalClasses);
+                }
+            }
+            
+            function updateProgress() {
+                if (!currentTrackId || !audioPlayer.duration) return;
+                const { currentTime, duration } = audioPlayer;
+                const progressPercent = (currentTime / duration) * 100;
+                const progressBar = document.getElementById(`progress-${currentTrackId}`);
+                if (progressBar) progressBar.style.width = `${progressPercent}%`;
+                const timeDisplay = document.getElementById(`time-${currentTrackId}`);
+                if (timeDisplay) timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+            }
+
+            function updateDurationDisplay() {
+                if (!currentTrackId) return;
+                const duration = audioPlayer.duration;
+                trackDurations[currentTrackId] = duration;
+                updateProgress();
+            }
+
+            function updatePlayIcon(trackId, isPlaying) {
+                tracks.forEach(t => {
+                    const iconEl = document.getElementById(`icon-${t.id}`);
+                    if (t.id !== trackId) {
+                        if (iconEl) iconEl.textContent = '▶';
+                    }
+                });
+                const iconEl = document.getElementById(`icon-${trackId}`);
+                if (iconEl) iconEl.textContent = isPlaying ? '❚❚' : '▶';
+            }
+            
+            // --- REACTION & TIMEOUT LOGIC ---
+            function attachReactionListeners() {
+                document.querySelectorAll('.reaction-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        if (isTimeoutActive) return; // Prevent clicks during timeout
+
+                        const trackId = this.dataset.trackId;
+                        let timeoutDuration = 0;
+
+                        if (this.classList.contains('ignorance-button')) {
+                            const currentIgnorance = localIgnoranceScores[trackId];
+                            timeoutDuration = currentIgnorance; // Timeout is based on value *before* increment
+                            handleIgnoranceClick(trackId);
+                        } else if (this.classList.contains('understanding-button')) {
+                            const ignoranceValue = localIgnoranceScores[trackId];
+                            const enjoymentValue = parseInt(document.getElementById(`enjoyment-count-${trackId}`).textContent) || 0;
+                            timeoutDuration = ((ignoranceValue+1) * (enjoymentValue % 100));
+                            modifyUnderstanding(trackId, 1);
+                        } else if (this.classList.contains('enjoyment-button')) {
+                            timeoutDuration = 10;
+                            incrementEnjoyment(trackId);
+                        }
+
+                        if (timeoutDuration > 0) {
+                            startGlobalTimeout(timeoutDuration);
+                        }
+                    });
+                });
+            }
+            
+            function startGlobalTimeout(durationInSeconds) {
+                isTimeoutActive = true;
+                document.querySelectorAll('.reaction-button').forEach(btn => btn.classList.add('disabled'));
+
+                const timeoutBarBg = document.getElementById('global-timeout-bar-bg');
+                const timeoutBarFg = document.getElementById('global-timeout-bar-fg');
+                timeoutBarBg.classList.remove('hidden');
+                timeoutBarFg.style.width = '0%';
+                
+                const startTime = Date.now();
+                const endTime = startTime + durationInSeconds * 1000;
+
+                timeoutInterval = setInterval(() => {
+                    const now = Date.now();
+                    const elapsed = now - startTime;
+                    const progress = Math.min((elapsed / (durationInSeconds * 1000)) * 100, 100);
+                    timeoutBarFg.style.width = `${progress}%`;
+
+                    if (now >= endTime) {
+                        endGlobalTimeout();
+                    }
+                }, 50); // Update progress bar frequently
+            }
+
+            function endGlobalTimeout() {
+                clearInterval(timeoutInterval);
+                isTimeoutActive = false;
+                document.querySelectorAll('.reaction-button').forEach(btn => btn.classList.remove('disabled'));
+                const timeoutBarBg = document.getElementById('global-timeout-bar-bg');
+                timeoutBarBg.classList.add('hidden');
+                 document.getElementById('global-timeout-bar-fg').style.width = '0%';
+            }
+
+
+            function handleIgnoranceClick(trackId) {
+                localIgnoranceScores[trackId]++;
+                const countEl = document.getElementById(`ignorance-count-${trackId}`);
+                if (countEl) {
+                    countEl.textContent = localIgnoranceScores[trackId];
+                }
+                modifyUnderstanding(trackId, -2);
+            }
+
+            function modifyUnderstanding(trackId, change) {
+                database.ref(`understanding/${trackId}`).transaction(currentValue => (currentValue || 0) + change);
+            }
+            
+            function incrementEnjoyment(trackId) {
+                database.ref(`enjoyment/${trackId}`).transaction(currentValue => (currentValue || 0) + 1);
+            }
+
+            function listenForReactionUpdates() {
+                ['understanding', 'enjoyment'].forEach(reactionType => {
+                    const reactionRef = database.ref(reactionType);
+                    reactionRef.on('value', (snapshot) => {
+                        const counts = snapshot.val();
+                        if (counts) {
+                            tracks.forEach(track => {
+                                const count = counts[track.id] || 0;
+                                const countEl = document.getElementById(`${reactionType}-count-${track.id}`);
+                                if (countEl) { countEl.textContent = count; }
+                            });
+                        }
+                    });
+                });
+            }
+
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return '--:--';
+                const minutes = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // --- INITIALIZE ---
+            renderPlaylist();
+        });
+    </script>
+</body>
+</html>
